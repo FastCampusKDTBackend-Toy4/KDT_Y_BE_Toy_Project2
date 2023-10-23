@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
-class TimeScheduleInfo {
+public class TimeScheduleInfo {
 
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
