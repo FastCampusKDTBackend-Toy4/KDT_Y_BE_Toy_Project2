@@ -21,15 +21,15 @@ public class TripService {
     }
 
     @Transactional(readOnly = true)
-    public GetTripResponse getTripById(final Long id) {
+    public GetTripResponse getTripById(final Long tripId) {
         return null;
     }
 
-    public CreateTripResponse createTrip(CreateTripRequest request) {
+    public CreateTripResponse createTrip(final CreateTripRequest request) {
         return null;
     }
 
-    public EditTripResponse editTrip(EditTripRequest request) {
+    public EditTripResponse editTrip(final Long tripId, final EditTripRequest request) {
         return null;
     }
 }

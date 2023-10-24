@@ -11,19 +11,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/v1/trips")
 @RequiredArgsConstructor
 public class TripController {
     private final TripService tripService;
 
-    @GetMapping("/trips")
+    @GetMapping
     public ResponseEntity<List<GetTripResponse>> getAllTrips() {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(tripService.getAllTrips());
     }
 
-    @GetMapping("/trips/{trip_id}")
+    @GetMapping("/{trip_id}")
     public ResponseEntity<GetTripResponse> getTripById(
             @PathVariable(name = "trip_id") final Long tripId
     ) {
@@ -32,7 +32,7 @@ public class TripController {
                 .body(tripService.getTripById(tripId));
     }
 
-    @PostMapping("/trips")
+    @PostMapping
     public ResponseEntity<CreateTripResponse> createTrip(
             @RequestBody final CreateTripRequest request
     ) {
@@ -41,12 +41,13 @@ public class TripController {
                 .body(tripService.createTrip(request));
     }
 
-    @PutMapping("/trips/{trip_id}")
+    @PutMapping("/{trip_id}")
     public ResponseEntity<EditTripResponse> editTrip(
+            @PathVariable(name = "trip_id") final Long tripId,
             @RequestBody final EditTripRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(tripService.editTrip(request));
+                .body(tripService.editTrip(tripId, request));
     }
 }
