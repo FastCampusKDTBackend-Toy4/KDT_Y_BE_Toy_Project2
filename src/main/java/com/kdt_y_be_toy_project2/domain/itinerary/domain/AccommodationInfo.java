@@ -10,7 +10,7 @@ public class AccommodationInfo {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "startDateTime", column = @Column(name = "accommodation_start_date_time", nullable = false)),
+            @AttributeOverride(name = "startDateTime", column = @Column(name = "accommodation_start_date_time")),
             @AttributeOverride(name = "endDateTime", column = @Column(name = "accommodation_end_date_time"))
     })
     private TimeScheduleInfo accommodationSchedule;
