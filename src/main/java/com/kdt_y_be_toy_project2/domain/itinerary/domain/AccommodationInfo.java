@@ -1,5 +1,6 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.domain;
 
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.AccommodationInfoDTO;
 import com.kdt_y_be_toy_project2.domain.model.PlaceInfo;
 import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
 import jakarta.persistence.*;

@@ -1,14 +1,14 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.domain;
 
-import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryDTO;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Entity
-@Table(name = "itinerary")
+
+@Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Itinerary {
     
@@ -27,5 +27,12 @@ public class Itinerary {
     @Embedded
     private AccommodationInfo accommodationInfo;
 
-
+    public static Itinerary to(ItineraryDTO itineraryDTO) {
+        return Itinerary.builder()
+                .id(itineraryDTO.getId())
+                .stayInfo(StayInfo.to(itineraryDTO.getStayInfoDTO()))
+                .moveInfo(MoveInfo.to(itineraryDTO.getMoveInfoDTO()))
+                .accommodationInfo(AccommodationInfo.to(itineraryDTO.getAccommodationInfoDTO()))
+                .build();
+    }
 }
