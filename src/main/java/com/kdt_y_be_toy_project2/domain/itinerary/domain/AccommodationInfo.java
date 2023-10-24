@@ -17,7 +17,7 @@ public class AccommodationInfo {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "name", column = @Column(name = "accommodation_place_name", nullable = false)),
+            @AttributeOverride(name = "name", column = @Column(name = "accommodation_place_name")),
     })
     private PlaceInfo accommodationPlaceInfo;
 

@@ -14,10 +14,8 @@ import lombok.*;
 @Setter
 public class StayInfoDTO {
 
-    @NotNull
     private TimeScheduleInfo staySchedule;
 
-    @NotNull
     private PlaceInfo stayPlaceInfo;
 
     public static StayInfoDTO from(final StayInfo stayInfo){

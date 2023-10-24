@@ -4,7 +4,6 @@ import com.kdt_y_be_toy_project2.domain.itinerary.domain.MoveInfo;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.TransportationType;
 import com.kdt_y_be_toy_project2.domain.model.PlaceInfo;
 import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Builder
@@ -17,11 +16,9 @@ public class MoveInfoDTO {
     @NotNull
     private TimeScheduleInfo moveSchedule;
 
-    @NotNull
-    private PlaceInfo movePlaceSourceInfo;
+    private PlaceInfo sourcePlaceInfo ;
 
-    @NotNull
-    private PlaceInfo movePlaceDestInfo;
+    private PlaceInfo destPlaceInfo ;
 
     @NotNull
     private TransportationType transportationType;
@@ -29,8 +26,8 @@ public class MoveInfoDTO {
     public static MoveInfoDTO from(final MoveInfo moveInfo){
         return MoveInfoDTO.builder()
                 .moveSchedule(moveInfo.getMoveSchedule())
-                .movePlaceDestInfo(moveInfo.getMovePlaceDestInfo())
-                .movePlaceSourceInfo(moveInfo.getMovePlaceSourceInfo())
+                .sourcePlaceInfo(moveInfo.getSourcePlaceInfo())
+                .destPlaceInfo(moveInfo.getDestPlaceInfo())
                 .transportationType(moveInfo.getTransportationType())
                 .build();
     }

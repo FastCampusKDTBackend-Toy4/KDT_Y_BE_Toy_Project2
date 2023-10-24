@@ -11,14 +11,14 @@ public class StayInfo {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "startDateTime", column = @Column(name = "stay_start_date_time", nullable = false)),
-            @AttributeOverride(name = "endDateTime", column = @Column(name = "stay_end_date_time", nullable = false))
+            @AttributeOverride(name = "startDateTime", column = @Column(name = "stay_start_date_time")),
+            @AttributeOverride(name = "endDateTime", column = @Column(name = "stay_end_date_time"))
     })
     private TimeScheduleInfo staySchedule;
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "name", column = @Column(name = "stay_place_name", nullable = false)),
+            @AttributeOverride(name = "name", column = @Column(name = "stay_place_name")),
     })
     private PlaceInfo stayPlaceInfo;
 }

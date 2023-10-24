@@ -14,7 +14,6 @@ public class ItineraryDTO {
     @NotNull
     private Long id;
 
-    @NotNull
     private StayInfoDTO stayInfoDTO;
 
     @NotNull

@@ -17,18 +17,18 @@ public class MoveInfo {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "name", column = @Column(name = "move_soucre_place_name", nullable = false))
+            @AttributeOverride(name = "name", column = @Column(name = "soucre_place_name"))
     })
-    private PlaceInfo movePlaceSourceInfo;
+    private PlaceInfo sourcePlaceInfo;
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "name", column = @Column(name = "move_dest_place_name", nullable = false))
+            @AttributeOverride(name = "name", column = @Column(name = "dest_place_name"))
     })
-    private PlaceInfo movePlaceDestInfo;
+    private PlaceInfo destPlaceInfo;
 
 
-    @Column(name = "transportation_type", nullable = false)
+    @Column(name = "transportation_type")
     @Enumerated(EnumType.STRING)
     private TransportationType transportationType;
 
@@ -36,8 +36,8 @@ public class MoveInfo {
     public static MoveInfo to(final MoveInfoDTO moveInfoDTO) {
         return MoveInfo.builder()
                 .moveSchedule(moveInfoDTO.getMoveSchedule())
-                .movePlaceDestInfo((moveInfoDTO.getMovePlaceDestInfo()))
-                .movePlaceSourceInfo(moveInfoDTO.getMovePlaceSourceInfo())
+                .sourcePlaceInfo((moveInfoDTO.getSourcePlaceInfo()))
+                .destPlaceInfo(moveInfoDTO.getDestPlaceInfo())
                 .transportationType(moveInfoDTO.getTransportationType())
                 .build();
     }

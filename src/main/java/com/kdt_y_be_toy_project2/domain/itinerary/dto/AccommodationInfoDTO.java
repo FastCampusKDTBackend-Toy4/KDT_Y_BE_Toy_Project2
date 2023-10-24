@@ -3,7 +3,6 @@ package com.kdt_y_be_toy_project2.domain.itinerary.dto;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.AccommodationInfo;
 import com.kdt_y_be_toy_project2.domain.model.PlaceInfo;
 import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 
