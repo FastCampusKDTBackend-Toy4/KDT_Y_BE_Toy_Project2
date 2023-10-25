@@ -1,10 +1,12 @@
 package com.kdt_y_be_toy_project2.domain.trip.dto;
 
+import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.domain.TripType;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 public record CreateTripResponse(
@@ -12,7 +14,8 @@ public record CreateTripResponse(
         String name,
         LocalDateTime startDateTime,
         LocalDateTime endDateTime,
-        TripType tripType
+        TripType tripType,
+        List<Itinerary> itineraries
 ) {
     public static CreateTripResponse from(Trip trip) {
         return CreateTripResponse.builder()
@@ -21,6 +24,7 @@ public record CreateTripResponse(
                 .startDateTime(trip.getTripSchedule().getStartDateTime())
                 .endDateTime(trip.getTripSchedule().getEndDateTime())
                 .tripType(trip.getTripType())
+                .itineraries(trip.getItineraries())
                 .build();
     }
 }
