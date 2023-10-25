@@ -11,7 +11,7 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record EditTripRequest(
+public record TripRequest(
         @NotBlank(message = "여행 이름을 입력해야 합니다.")
         String name,
 
@@ -26,7 +26,7 @@ public record EditTripRequest(
         @NotNull(message = "국내외여부를 입력해야 합니다. (예: DOMESTIC)")
         TripType tripType
 ) {
-    public static Trip toEntity(EditTripRequest request) {
+    public static Trip toEntity(final TripRequest request) {
         return Trip.builder()
                 .name(request.name)
                 .tripType(request.tripType)
