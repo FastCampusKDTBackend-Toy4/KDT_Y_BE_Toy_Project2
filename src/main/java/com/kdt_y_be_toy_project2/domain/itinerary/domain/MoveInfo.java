@@ -4,13 +4,18 @@ import com.kdt_y_be_toy_project2.domain.itinerary.dto.MoveInfoDTO;
 import com.kdt_y_be_toy_project2.domain.model.PlaceInfo;
 import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
 import jakarta.persistence.*;
+import lombok.*;
 
 @Embeddable
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@Getter
 public class MoveInfo {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "startDateTime", column = @Column(name = "move_start_date_time", nullable = false)),
+            @AttributeOverride(name = "startDateTime", column = @Column(name = "move_start_date_time")),
             @AttributeOverride(name = "endDateTime", column = @Column(name = "move_end_date_time"))
     })
     private TimeScheduleInfo moveSchedule;
@@ -35,10 +40,10 @@ public class MoveInfo {
 
     public static MoveInfo to(final MoveInfoDTO moveInfoDTO) {
         return MoveInfo.builder()
-                .moveSchedule(moveInfoDTO.getMoveSchedule())
-                .sourcePlaceInfo((moveInfoDTO.getSourcePlaceInfo()))
-                .destPlaceInfo(moveInfoDTO.getDestPlaceInfo())
-                .transportationType(moveInfoDTO.getTransportationType())
+                .moveSchedule(moveInfoDTO.moveSchedule())
+                .sourcePlaceInfo((moveInfoDTO.sourcePlaceInfo()))
+                .destPlaceInfo(moveInfoDTO.destPlaceInfo())
+                .transportationType(moveInfoDTO.transportationType())
                 .build();
     }
 

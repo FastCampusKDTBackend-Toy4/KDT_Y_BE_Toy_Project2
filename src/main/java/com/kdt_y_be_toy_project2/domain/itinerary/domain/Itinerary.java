@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
-@Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
@@ -16,6 +15,10 @@ public class Itinerary {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false)
     private Long id;
+
+//    @ManyToOne
+//    @JoinColumn(name="tripId")
+//    private Trip tripId;
 
     //체류 정보, 이동 정보, 숙소 정보
     @Embedded
@@ -29,10 +32,10 @@ public class Itinerary {
 
     public static Itinerary to(ItineraryDTO itineraryDTO) {
         return Itinerary.builder()
-                .id(itineraryDTO.getId())
-                .stayInfo(StayInfo.to(itineraryDTO.getStayInfoDTO()))
-                .moveInfo(MoveInfo.to(itineraryDTO.getMoveInfoDTO()))
-                .accommodationInfo(AccommodationInfo.to(itineraryDTO.getAccommodationInfoDTO()))
+                .id(itineraryDTO.id())
+                .stayInfo(StayInfo.to(itineraryDTO.stayInfoDTO()))
+                .moveInfo(MoveInfo.to(itineraryDTO.moveInfoDTO()))
+                .accommodationInfo(AccommodationInfo.to(itineraryDTO.accommodationInfoDTO()))
                 .build();
     }
 }
