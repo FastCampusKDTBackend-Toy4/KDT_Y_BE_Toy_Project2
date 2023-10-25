@@ -38,12 +38,16 @@ public class Trip {
     })
     private TimeScheduleInfo tripSchedule;
 
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Itinerary> itineraries;
+
     @Builder
     private Trip(Long id, String name, TripType tripType, TimeScheduleInfo tripSchedule) {
         this.id = id;
         this.name = name;
         this.tripType = tripType;
         this.tripSchedule = tripSchedule;
+        this.itineraries = new ArrayList<>();
     }
 
     public Trip update(Trip trip) {
