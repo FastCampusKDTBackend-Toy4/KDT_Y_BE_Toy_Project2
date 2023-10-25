@@ -12,18 +12,18 @@ import java.time.LocalDateTime;
 
 @Builder
 public record CreateTripRequest(
-        @NotBlank
+        @NotBlank(message = "여행 이름을 입력해야 합니다.")
         String name,
 
-        @NotNull
+        @NotNull(message = "여행 시작 시간을 입력해야 합니다. (예: 2023-10-25 12:00)")
         @DateTimeFormat(pattern = "YYYY-MM-DD HH:mm")
         LocalDateTime startDateTime,
 
-        @NotNull
+        @NotNull(message = "여행 종료 시간을 입력해야 합니다. (예: 2023-10-25 12:00)")
         @DateTimeFormat(pattern = "YYYY-MM-DD HH:mm")
         LocalDateTime endDateTime,
 
-        @NotNull
+        @NotNull(message = "국내외여부를 입력해야 합니다. (예: DOMESTIC)")
         TripType tripType
 ) {
     public static Trip toEntity(final CreateTripRequest request) {
