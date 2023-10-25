@@ -1,6 +1,7 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.domain;
 
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryDTO;
+import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,6 +10,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Entity
 public class Itinerary {
     
     @Id
@@ -16,9 +18,9 @@ public class Itinerary {
     @Column(name = "id", updatable = false)
     private Long id;
 
-//    @ManyToOne
-//    @JoinColumn(name="tripId")
-//    private Trip tripId;
+    @ManyToOne
+    @JoinColumn(name = "trip")
+    private Trip trip;
 
     //체류 정보, 이동 정보, 숙소 정보
     @Embedded
