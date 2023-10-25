@@ -1,5 +1,7 @@
 package com.kdt_y_be_toy_project2.domain.trip.dto;
 
+import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
+import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.domain.TripType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,4 +26,15 @@ public record CreateTripRequest(
         @NotNull
         TripType tripType
 ) {
+    public static Trip toEntity(final CreateTripRequest request) {
+        return Trip.builder()
+                .name(request.name)
+                .tripType(request.tripType)
+                .tripSchedule(
+                        TimeScheduleInfo.builder()
+                                .startDateTime(LocalDateTime.from(request.startDateTime))
+                                .endDateTime(LocalDateTime.from(request.endDateTime))
+                                .build()
+                ).build();
+    }
 }
