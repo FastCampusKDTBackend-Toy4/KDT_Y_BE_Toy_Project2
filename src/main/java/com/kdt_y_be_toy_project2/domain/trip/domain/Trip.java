@@ -39,4 +39,11 @@ public class Trip {
         this.tripType = tripType;
         this.tripSchedule = tripSchedule;
     }
+
+    public Trip update(Trip trip) {
+        this.name = trip.name;
+        this.tripType = trip.tripType;
+        this.tripSchedule = trip.tripSchedule;
+        return this;
+    }
 }
