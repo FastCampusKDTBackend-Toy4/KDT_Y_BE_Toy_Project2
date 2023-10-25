@@ -1,4 +1,21 @@
-spring:
+
+  config:
+    import: optional:file:.env[.properties]
   profiles:
     active: dev
 
+  datasource:
+    url: jdbc:mysql://localhost:${LOCAL_MYSQL_PORT}/fc_sns?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${LOCAL_MYSQL_USERNAME}
+    password: ${LOCAL_MYSQL_PASSWORD}
+
+  jpa:
+    show-sql: true
+    properties:
+      format_sql: true
+      dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
