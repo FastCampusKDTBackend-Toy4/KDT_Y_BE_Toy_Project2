@@ -5,16 +5,14 @@ import com.kdt_y_be_toy_project2.domain.itinerary.domain.MoveInfo;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.TransportationType;
 import com.kdt_y_be_toy_project2.domain.model.PlaceInfo;
 import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
-import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
 
 @Builder
-public record MoveInfoDTO (
+public record MoveInfoRequest(
         @NotNull(message = "이동 시작 시간을 입력해야 합니다. (예: 2023-10-25 12:00)")
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
         LocalDateTime startDateTime,
@@ -29,13 +27,15 @@ public record MoveInfoDTO (
 
         , TransportationType transportationType
 ){
-    public static MoveInfoDTO from(final MoveInfo moveInfo){
-        return MoveInfoDTO.builder()
-                .startDateTime(moveInfo.getMoveSchedule().getStartDateTime())
-                .endDateTime(moveInfo.getMoveSchedule().getEndDateTime())
-                .sourcePlaceInfo(moveInfo.getSourcePlaceInfo())
-                .destPlaceInfo(moveInfo.getDestPlaceInfo())
-                .transportationType(moveInfo.getTransportationType())
+    public static MoveInfo to(final MoveInfoRequest moveInfoRequest) {
+        return MoveInfo.builder()
+                .moveSchedule(TimeScheduleInfo.builder()
+                        .startDateTime(moveInfoRequest.startDateTime())
+                        .endDateTime(moveInfoRequest.endDateTime())
+                        .build())
+                .sourcePlaceInfo((moveInfoRequest.sourcePlaceInfo()))
+                .destPlaceInfo(moveInfoRequest.destPlaceInfo())
+                .transportationType(moveInfoRequest.transportationType())
                 .build();
     }
 }

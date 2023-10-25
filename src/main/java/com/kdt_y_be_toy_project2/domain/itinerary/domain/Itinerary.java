@@ -1,6 +1,5 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.domain;
 
-import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryDTO;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,16 +30,6 @@ public class Itinerary {
 
     @Embedded
     private AccommodationInfo accommodationInfo;
-
-    public static Itinerary to(ItineraryDTO itineraryDTO, Trip trip) {
-        return Itinerary.builder()
-                .id(itineraryDTO.id())
-                .trip(trip)
-                .stayInfo(StayInfo.to(itineraryDTO.stayInfoDTO()))
-                .moveInfo(MoveInfo.to(itineraryDTO.moveInfoDTO()))
-                .accommodationInfo(AccommodationInfo.to(itineraryDTO.accommodationInfoDTO()))
-                .build();
-    }
 
     public Itinerary update(Itinerary itinerary) {
         this.stayInfo = itinerary.stayInfo;

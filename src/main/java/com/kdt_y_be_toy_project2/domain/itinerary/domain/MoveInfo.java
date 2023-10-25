@@ -1,6 +1,6 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.domain;
 
-import com.kdt_y_be_toy_project2.domain.itinerary.dto.MoveInfoDTO;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.MoveInfoRequest;
 import com.kdt_y_be_toy_project2.domain.model.PlaceInfo;
 import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
 import jakarta.persistence.*;
@@ -38,16 +38,5 @@ public class MoveInfo {
     private TransportationType transportationType;
 
 
-    public static MoveInfo to(final MoveInfoDTO moveInfoDTO) {
-        return MoveInfo.builder()
-                .moveSchedule(TimeScheduleInfo.builder()
-                        .startDateTime(moveInfoDTO.startDateTime())
-                        .endDateTime(moveInfoDTO.endDateTime())
-                        .build())
-                .sourcePlaceInfo((moveInfoDTO.sourcePlaceInfo()))
-                .destPlaceInfo(moveInfoDTO.destPlaceInfo())
-                .transportationType(moveInfoDTO.transportationType())
-                .build();
-    }
 
 }

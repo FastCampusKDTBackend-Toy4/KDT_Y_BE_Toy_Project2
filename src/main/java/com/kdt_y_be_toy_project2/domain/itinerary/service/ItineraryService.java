@@ -1,7 +1,8 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.service;
 
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
-import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryDTO;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundException;
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
@@ -22,41 +23,40 @@ public class ItineraryService {
     private final TripRepository tripRepository;
 
     @Transactional(readOnly = true)
-    public List<ItineraryDTO> getAllItineraries(final Long tripId) {
+    public List<ItineraryResponse> getAllItineraries(final Long tripId) {
         return tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new)
-                .getItineraries().stream().map(itinerary -> ItineraryDTO.from(itinerary)).toList();
+                .getItineraries().stream().map(itinerary -> ItineraryResponse.from(itinerary)).toList();
     }
 
     @Transactional(readOnly = true)
-    public ItineraryDTO getItineraryById(final Long tripId, final Long itineraryId) {
+    public ItineraryResponse getItineraryById(final Long tripId, final Long itineraryId) {
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
 
         for (Itinerary itinerary : retrivedTrip.getItineraries()) {
             if (itinerary.getId() == itineraryId) {
-                return ItineraryDTO
+                return ItineraryResponse
                         .from(itineraryRepository
                                 .findById(itineraryId)
                                 .orElseThrow(() -> new RuntimeException("여정 정보를 찾을 수 없습니다.")));
             }
         }
-
         throw new RuntimeException("여행 id 와 여정 id관련 여정 entity가 없습니다.");
     }
 
-    public ItineraryDTO createItinerary(final Long tripId, final ItineraryDTO request) {
+    public ItineraryResponse createItinerary(final Long tripId, final ItineraryRequest request) {
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
-        Itinerary savedItinerary = itineraryRepository.save(Itinerary.to(request, retrivedTrip));
+        Itinerary savedItinerary = itineraryRepository.save(ItineraryRequest.toEntity(request, retrivedTrip));
         retrivedTrip.getItineraries().add(savedItinerary);
 
-        return null;
+        return ItineraryResponse.from(savedItinerary);
     }
 
-    public ItineraryDTO editItinerary(final Long itinerary_id, final ItineraryDTO request) {
+    public ItineraryResponse editItinerary(final Long itinerary_id, final ItineraryRequest request) {
         Itinerary updatedItinerary = itineraryRepository.findById(itinerary_id)
-                .map(itinerary -> itinerary.update(Itinerary.to(request, itinerary.getTrip())))
+                .map(itinerary -> itinerary.update(ItineraryRequest.toEntity(request, itinerary.getTrip())))
                 .orElseThrow(() -> new RuntimeException("여정 정보를 찾을 수 없습니다."));
         return Optional.of(itineraryRepository.save(updatedItinerary))
-                .map(ItineraryDTO::from)
+                .map(ItineraryResponse::from)
                 .orElseThrow();
     }
 }

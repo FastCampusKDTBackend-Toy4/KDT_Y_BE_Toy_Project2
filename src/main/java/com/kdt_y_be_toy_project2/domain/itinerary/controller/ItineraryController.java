@@ -1,7 +1,8 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.controller;
 
 
-import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryDTO;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
 import com.kdt_y_be_toy_project2.domain.itinerary.service.ItineraryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class ItineraryController {
     private final ItineraryService itineraryService;
 
     @GetMapping("/trips/{trip_id}/itineraries")
-    public ResponseEntity<List<ItineraryDTO>> getAllItineraries(
+    public ResponseEntity<List<ItineraryResponse>> getAllItineraries(
             @PathVariable(name = "trip_id") final Long tripId
     ) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -27,7 +28,7 @@ public class ItineraryController {
     }
 
     @GetMapping("/trips/{trip_id}/itineraries/{itinerary_id}")
-    public ResponseEntity<ItineraryDTO> getItineraryByTripId(
+    public ResponseEntity<ItineraryResponse> getItineraryByTripId(
             @PathVariable(name = "trip_id") final Long tripId,
             @PathVariable(name = "itinerary_id") final Long itineraryId
     ) {
@@ -37,9 +38,9 @@ public class ItineraryController {
     }
 
     @PostMapping("/trips/{trip_id}/itineraries")
-    public ResponseEntity<ItineraryDTO> createItinerary(
+    public ResponseEntity<ItineraryResponse> createItinerary(
             @PathVariable(name = "trip_id") final Long tripId,
-            @RequestBody final ItineraryDTO request
+            @RequestBody final ItineraryRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -47,10 +48,10 @@ public class ItineraryController {
     }
 
     @PutMapping("/trips/{trip_id}/itineraries/{itinerary_id}")
-    public ResponseEntity<ItineraryDTO> editItinerary(
+    public ResponseEntity<ItineraryResponse> editItinerary(
             @PathVariable(name = "trip_id") final Long tripId,
             @PathVariable(name = "itinerary_id") final Long itinerary_id,
-            @RequestBody final ItineraryDTO request
+            @RequestBody final ItineraryRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
