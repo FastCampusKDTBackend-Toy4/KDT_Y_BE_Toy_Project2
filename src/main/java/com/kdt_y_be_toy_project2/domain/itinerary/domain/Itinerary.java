@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Entity
 public class Itinerary {
     
     @Id
