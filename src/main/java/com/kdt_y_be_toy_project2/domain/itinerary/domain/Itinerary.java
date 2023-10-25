@@ -1,6 +1,7 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.domain;
 
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryDTO;
+import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,6 +10,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Entity
 public class Itinerary {
     
     @Id
@@ -16,9 +18,9 @@ public class Itinerary {
     @Column(name = "id", updatable = false)
     private Long id;
 
-//    @ManyToOne
-//    @JoinColumn(name="tripId")
-//    private Trip tripId;
+    @ManyToOne
+    @JoinColumn(name="trip")
+    private Trip trip;
 
     //체류 정보, 이동 정보, 숙소 정보
     @Embedded
@@ -30,12 +32,20 @@ public class Itinerary {
     @Embedded
     private AccommodationInfo accommodationInfo;
 
-    public static Itinerary to(ItineraryDTO itineraryDTO) {
+    public static Itinerary to(ItineraryDTO itineraryDTO, Trip trip) {
         return Itinerary.builder()
                 .id(itineraryDTO.id())
+                .trip(trip)
                 .stayInfo(StayInfo.to(itineraryDTO.stayInfoDTO()))
                 .moveInfo(MoveInfo.to(itineraryDTO.moveInfoDTO()))
                 .accommodationInfo(AccommodationInfo.to(itineraryDTO.accommodationInfoDTO()))
                 .build();
+    }
+
+    public Itinerary update(Itinerary itinerary) {
+        this.stayInfo = itinerary.stayInfo;
+        this.moveInfo = itinerary.moveInfo;
+        this.accommodationInfo = itinerary.accommodationInfo;
+        return this;
     }
 }

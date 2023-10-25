@@ -31,7 +31,10 @@ public class StayInfo {
 
     public static StayInfo to(final StayInfoDTO stayInfoDTO) {
         return StayInfo.builder()
-                .staySchedule(stayInfoDTO.staySchedule())
+                .staySchedule(TimeScheduleInfo.builder()
+                        .startDateTime(stayInfoDTO.startDateTime())
+                        .endDateTime(stayInfoDTO.endDateTime())
+                        .build())
                 .stayPlaceInfo(stayInfoDTO.stayPlaceInfo())
                 .build();
     }

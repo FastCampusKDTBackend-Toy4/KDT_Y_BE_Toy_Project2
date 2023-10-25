@@ -1,6 +1,8 @@
 package com.kdt_y_be_toy_project2.global.error;
 
 import java.time.LocalDateTime;
+
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;

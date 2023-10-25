@@ -40,7 +40,10 @@ public class MoveInfo {
 
     public static MoveInfo to(final MoveInfoDTO moveInfoDTO) {
         return MoveInfo.builder()
-                .moveSchedule(moveInfoDTO.moveSchedule())
+                .moveSchedule(TimeScheduleInfo.builder()
+                        .startDateTime(moveInfoDTO.startDateTime())
+                        .endDateTime(moveInfoDTO.endDateTime())
+                        .build())
                 .sourcePlaceInfo((moveInfoDTO.sourcePlaceInfo()))
                 .destPlaceInfo(moveInfoDTO.destPlaceInfo())
                 .transportationType(moveInfoDTO.transportationType())

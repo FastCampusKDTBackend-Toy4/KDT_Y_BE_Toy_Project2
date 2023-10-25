@@ -29,7 +29,10 @@ public class AccommodationInfo {
 
     public static AccommodationInfo to(AccommodationInfoDTO accommodationInfoDTO) {
         return AccommodationInfo.builder()
-                .accommodationSchedule(accommodationInfoDTO.accommodationSchedule())
+                .accommodationSchedule(TimeScheduleInfo.builder()
+                        .startDateTime(accommodationInfoDTO.startDateTime())
+                        .endDateTime(accommodationInfoDTO.endDateTime())
+                        .build())
                 .accommodationPlaceInfo(accommodationInfoDTO.accommodationPlaceInfo())
                 .build();
     }

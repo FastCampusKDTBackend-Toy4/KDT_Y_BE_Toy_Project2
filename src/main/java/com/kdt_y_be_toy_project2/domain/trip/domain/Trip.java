@@ -1,11 +1,14 @@
 package com.kdt_y_be_toy_project2.domain.trip.domain;
 
+import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
 import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Table(name = "trip")
@@ -25,10 +28,13 @@ public class Trip {
     @Enumerated(EnumType.STRING)
     private TripType tripType;
 
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Itinerary> itineraries;
+
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "start_date_time", column = @Column(name = "startDateTime", nullable = false)),
-        @AttributeOverride(name = "end_date_time", column = @Column(name = "endDateTime", nullable = false))
+            @AttributeOverride(name = "start_date_time", column = @Column(name = "startDateTime", nullable = false)),
+            @AttributeOverride(name = "end_date_time", column = @Column(name = "endDateTime", nullable = false))
     })
     private TimeScheduleInfo tripSchedule;
 
