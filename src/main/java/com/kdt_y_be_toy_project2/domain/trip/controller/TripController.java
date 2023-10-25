@@ -2,6 +2,7 @@ package com.kdt_y_be_toy_project2.domain.trip.controller;
 
 import com.kdt_y_be_toy_project2.domain.trip.dto.*;
 import com.kdt_y_be_toy_project2.domain.trip.service.TripService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,7 +35,7 @@ public class TripController {
 
     @PostMapping
     public ResponseEntity<CreateTripResponse> createTrip(
-            @RequestBody final CreateTripRequest request
+            @Valid @RequestBody final CreateTripRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -44,7 +45,7 @@ public class TripController {
     @PutMapping("/{trip_id}")
     public ResponseEntity<EditTripResponse> editTrip(
             @PathVariable(name = "trip_id") final Long tripId,
-            @RequestBody final EditTripRequest request
+            @Valid @RequestBody final EditTripRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
