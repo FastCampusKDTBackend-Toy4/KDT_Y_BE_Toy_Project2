@@ -3,7 +3,7 @@ package com.kdt_y_be_toy_project2.domain.itinerary.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.StayInfo;
 import com.kdt_y_be_toy_project2.domain.model.PlaceInfo;
-import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
+import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
@@ -24,7 +24,7 @@ public record StayInfoRequest(
 ) {
     public static StayInfo to(final StayInfoRequest stayInfoRequest) {
         return StayInfo.builder()
-                .staySchedule(TimeScheduleInfo.builder()
+                .staySchedule(DateTimeScheduleInfo.builder()
                         .startDateTime(stayInfoRequest.startDateTime())
                         .endDateTime(stayInfoRequest.endDateTime())
                         .build())
