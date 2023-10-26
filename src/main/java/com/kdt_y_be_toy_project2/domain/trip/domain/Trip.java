@@ -1,7 +1,7 @@
 package com.kdt_y_be_toy_project2.domain.trip.domain;
 
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
-import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
+import com.kdt_y_be_toy_project2.domain.model.DateScheduleInfo;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -37,11 +37,11 @@ public class Trip {
             @AttributeOverride(name = "start_date_time", column = @Column(name = "startDateTime", nullable = false)),
             @AttributeOverride(name = "end_date_time", column = @Column(name = "endDateTime", nullable = false))
     })
-    private TimeScheduleInfo tripSchedule;
+    private DateScheduleInfo tripSchedule;
 
 
     @Builder
-    private Trip(Long id, String name, TripType tripType, TimeScheduleInfo tripSchedule) {
+    private Trip(Long id, String name, TripType tripType, DateScheduleInfo tripSchedule) {
         this.id = id;
         this.name = name;
         this.tripType = tripType;

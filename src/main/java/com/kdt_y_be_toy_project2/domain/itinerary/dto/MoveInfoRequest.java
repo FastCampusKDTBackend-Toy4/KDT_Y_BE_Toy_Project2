@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.MoveInfo;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.TransportationType;
 import com.kdt_y_be_toy_project2.domain.model.PlaceInfo;
-import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
+import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -29,7 +29,7 @@ public record MoveInfoRequest(
 ){
     public static MoveInfo to(final MoveInfoRequest moveInfoRequest) {
         return MoveInfo.builder()
-                .moveSchedule(TimeScheduleInfo.builder()
+                .moveSchedule(DateTimeScheduleInfo.builder()
                         .startDateTime(moveInfoRequest.startDateTime())
                         .endDateTime(moveInfoRequest.endDateTime())
                         .build())
