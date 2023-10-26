@@ -24,7 +24,7 @@ public class Trip {
     private String name;
 
     @Column(name = "trip_type", nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = TripTypeConverter.class)
     private TripType tripType;
 
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
