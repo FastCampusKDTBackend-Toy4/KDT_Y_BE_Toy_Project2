@@ -59,13 +59,13 @@ public class ItineraryService {
 
     public ItineraryResponse editItinerary(final Long itinerary_id, final ItineraryRequest request) {
 
-        checkItineraryDuration(itineraryRepository.findById(itinerary_id)
-                .orElseThrow(ItineraryNotFoundException::new).getTrip(), request);
-        checkInvalidDate(request);
-
         Itinerary updatedItinerary = itineraryRepository.findById(itinerary_id)
                 .map(itinerary -> itinerary.update(ItineraryRequest.toEntity(request, itinerary.getTrip())))
                 .orElseThrow(() -> new ItineraryNotFoundException());
+
+        checkItineraryDuration(updatedItinerary.getTrip(), request);
+        checkInvalidDate(request);
+
         return Optional.of(itineraryRepository.save(updatedItinerary))
                 .map(ItineraryResponse::from)
                 .orElseThrow();
