@@ -72,8 +72,8 @@ public class ItineraryService {
     }
 
     void checkItineraryDuration(Trip trip, ItineraryRequest itinerary){
-        LocalDateTime tripStartTime = trip.getTripSchedule().getStartDateTime();
-        LocalDateTime tripEndTime = trip.getTripSchedule().getEndDateTime();
+        LocalDateTime tripStartTime = trip.getTripSchedule().getStartDate().atStartOfDay();
+        LocalDateTime tripEndTime = trip.getTripSchedule().getEndDate().atStartOfDay();
 
         if(     itinerary.stayInfoRequest().startDateTime().isBefore(tripStartTime) ||
                 itinerary.accommodationInfoRequest().startDateTime().isBefore(tripStartTime) ||
