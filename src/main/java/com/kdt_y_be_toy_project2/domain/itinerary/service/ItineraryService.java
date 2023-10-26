@@ -24,6 +24,7 @@ public class ItineraryService {
 
     @Transactional(readOnly = true)
     public List<ItineraryResponse> getAllItineraries(final Long tripId) {
+        System.out.println(tripId);
         return tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new)
                 .getItineraries().stream().map(itinerary -> ItineraryResponse.from(itinerary)).toList();
     }
@@ -44,7 +45,9 @@ public class ItineraryService {
     }
 
     public ItineraryResponse createItinerary(final Long tripId, final ItineraryRequest request) {
+
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
+
         Itinerary savedItinerary = itineraryRepository.save(ItineraryRequest.toEntity(request, retrivedTrip));
         retrivedTrip.getItineraries().add(savedItinerary);
 
@@ -59,4 +62,5 @@ public class ItineraryService {
                 .map(ItineraryResponse::from)
                 .orElseThrow();
     }
+
 }

@@ -5,6 +5,9 @@ import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
 import com.kdt_y_be_toy_project2.domain.itinerary.service.ItineraryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import java.util.List;
 @RequestMapping("/v1")
 @RequiredArgsConstructor
 public class ItineraryController {
+
     private final ItineraryService itineraryService;
 
     @GetMapping("/trips/{trip_id}/itineraries")
@@ -23,7 +27,6 @@ public class ItineraryController {
             @PathVariable(name = "trip_id") final Long tripId
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
                 .body(itineraryService.getAllItineraries(tripId));
     }
 
@@ -33,7 +36,6 @@ public class ItineraryController {
             @PathVariable(name = "itinerary_id") final Long itineraryId
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
                 .body(itineraryService.getItineraryById(tripId, itineraryId));
     }
 
@@ -42,8 +44,8 @@ public class ItineraryController {
             @PathVariable(name = "trip_id") final Long tripId,
             @RequestBody final ItineraryRequest request
     ) {
+
         return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
                 .body(itineraryService.createItinerary(tripId, request));
     }
 
@@ -54,7 +56,6 @@ public class ItineraryController {
             @RequestBody final ItineraryRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
                 .body(itineraryService.editItinerary(itinerary_id, request));
     }
 }
