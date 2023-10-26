@@ -22,8 +22,8 @@ public record TripResponse(
         return TripResponse.builder()
                 .tripId(trip.getId())
                 .tripName(trip.getName())
-                .startDateTime(DateTimeUtil.toString(trip.getTripSchedule().getStartDateTime()))
-                .endDateTime(DateTimeUtil.toString(trip.getTripSchedule().getEndDateTime()))
+                .startDate(DateTimeUtil.toString(trip.getTripSchedule().getStartDate()))
+                .endDate(DateTimeUtil.toString(trip.getTripSchedule().getEndDate()))
                 .tripType(trip.getTripType())
                 .itineraries(trip.getItineraries())
                 .build();

@@ -33,8 +33,8 @@ public record TripRequest(
                 .tripType(request.tripType)
                 .tripSchedule(
                         DateScheduleInfo.builder()
-                                .startDate(LocalDate.from(request.startDate))
-                                .endDate(LocalDate.from(request.endDate))
+                                .startDate(DateTimeUtil.toLocalDateTime(request.startDate))
+                                .endDate(DateTimeUtil.toLocalDateTime(request.endDate))
                                 .build()
                 ).build();
     }
