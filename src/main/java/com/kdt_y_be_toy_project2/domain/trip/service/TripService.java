@@ -21,7 +21,12 @@ public class TripService {
 
     @Transactional(readOnly = true)
     public List<TripResponse> getAllTrips() {
-        return tripRepository.findAll()
+        List<Trip> trips = tripRepository.findAll();
+
+        if (trips.isEmpty()) {
+            throw new TripNotFoundException();
+        }
+        return trips
                 .stream().map(TripResponse::from)
                 .toList();
     }
@@ -34,8 +39,7 @@ public class TripService {
     }
 
     public TripResponse createTrip(final TripRequest request) {
-        Trip newTrip = TripRequest.toEntity(request);
-        return Optional.of(tripRepository.save(newTrip))
+        return Optional.of(tripRepository.save(TripRequest.toEntity(request)))
                 .map(TripResponse::from)
                 .orElseThrow();
     }
@@ -44,6 +48,7 @@ public class TripService {
         Trip updatedTrip = tripRepository.findById(tripId)
                 .map(trip -> trip.update(TripRequest.toEntity(request)))
                 .orElseThrow(TripNotFoundException::new);
+
         return Optional.of(tripRepository.save(updatedTrip))
                 .map(TripResponse::from)
                 .orElseThrow();

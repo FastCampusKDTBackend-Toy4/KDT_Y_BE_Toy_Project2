@@ -1,7 +1,7 @@
 package com.kdt_y_be_toy_project2.domain.trip.dto;
 
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
-import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
+import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.domain.TripType;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.util.List;
 public record TripResponse(
         Long tripId,
         String tripName,
-        TimeScheduleInfo tripScheduleInfo,
+        DateTimeScheduleInfo tripScheduleInfo,
         TripType tripType,
         List<Itinerary> itineraries
 ) {

@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
-public class TimeScheduleInfo {
+public class DateTimeScheduleInfo {
 
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
 
     @Builder
-    private TimeScheduleInfo(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    private DateTimeScheduleInfo(LocalDateTime startDateTime, LocalDateTime endDateTime) {
         validateDateTimeRange(startDateTime, endDateTime);
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;

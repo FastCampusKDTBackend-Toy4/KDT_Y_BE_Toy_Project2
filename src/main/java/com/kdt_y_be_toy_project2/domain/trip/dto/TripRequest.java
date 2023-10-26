@@ -1,7 +1,7 @@
 package com.kdt_y_be_toy_project2.domain.trip.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
+import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.domain.TripType;
 import jakarta.validation.constraints.NotBlank;
@@ -31,7 +31,7 @@ public record TripRequest(
                 .name(request.name)
                 .tripType(request.tripType)
                 .tripSchedule(
-                        TimeScheduleInfo.builder()
+                        DateTimeScheduleInfo.builder()
                                 .startDateTime(LocalDateTime.from(request.startDateTime))
                                 .endDateTime(LocalDateTime.from(request.endDateTime))
                                 .build()

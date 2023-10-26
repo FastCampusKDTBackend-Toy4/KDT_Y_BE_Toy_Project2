@@ -9,7 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class TimeScheduleInfoTest {
+class DateTimeScheduleInfoTest {
 
     @DisplayName("TimeScheduleInfo 생성")
     @Nested
@@ -30,12 +30,12 @@ class TimeScheduleInfoTest {
             LocalDateTime end = LocalDateTime.parse(endSample);
 
             // when
-            TimeScheduleInfo timeScheduleInfo = TimeScheduleInfo.builder().startDateTime(start)
+            DateTimeScheduleInfo dateTimeScheduleInfo = DateTimeScheduleInfo.builder().startDateTime(start)
                 .endDateTime(end).build();
 
             // then
-            Assertions.assertThat(timeScheduleInfo.getStartDateTime()).isEqualTo(start);
-            Assertions.assertThat(timeScheduleInfo.getEndDateTime()).isEqualTo(end);
+            Assertions.assertThat(dateTimeScheduleInfo.getStartDateTime()).isEqualTo(start);
+            Assertions.assertThat(dateTimeScheduleInfo.getEndDateTime()).isEqualTo(end);
         }
 
         @DisplayName("startDate가 endDate 보다 미래라면, InvalidDateRangeException 예외가 던져진다.")
@@ -55,7 +55,7 @@ class TimeScheduleInfoTest {
 
             // when then
             Assertions.assertThatThrownBy(
-                    () -> TimeScheduleInfo.builder().startDateTime(start).endDateTime(end).build())
+                    () -> DateTimeScheduleInfo.builder().startDateTime(start).endDateTime(end).build())
                 .isInstanceOf(InvalidDateRangeException.class)
                 .hasMessage("startDateTime 는 항상 endDateTime 보다 과거여야 합니다. {"
                     + "\"startDate = \" %s / endDate = %s}".formatted(start, end));
@@ -81,7 +81,7 @@ class TimeScheduleInfoTest {
             LocalDateTime end = LocalDateTime.parse("2023-11-11T00:00");
             LocalDateTime targetLocalDateTime = LocalDateTime.parse(target);
 
-            TimeScheduleInfo timeSceduleInfo = TimeScheduleInfo.builder().startDateTime(start)
+            DateTimeScheduleInfo timeSceduleInfo = DateTimeScheduleInfo.builder().startDateTime(start)
                 .endDateTime(end).build();
 
             // when
@@ -108,7 +108,7 @@ class TimeScheduleInfoTest {
             LocalDateTime end = LocalDateTime.parse("2023-11-11T00:00");
             LocalDateTime targetLocalDateTime = LocalDateTime.parse(target);
 
-            TimeScheduleInfo timeSceduleInfo = TimeScheduleInfo.builder().startDateTime(start)
+            DateTimeScheduleInfo timeSceduleInfo = DateTimeScheduleInfo.builder().startDateTime(start)
                 .endDateTime(end).build();
 
             // when
@@ -135,7 +135,7 @@ class TimeScheduleInfoTest {
         void withTwoLocalDateTime_willCreated(String startSample, String endSample) {
 
             // given
-            TimeScheduleInfo changeTarget = TimeScheduleInfo.builder()
+            DateTimeScheduleInfo changeTarget = DateTimeScheduleInfo.builder()
                 .startDateTime(LocalDateTime.of(2022, 1, 1, 0, 0))
                 .endDateTime(LocalDateTime.of(2023, 1, 1, 0, 0))
                 .build();
@@ -163,7 +163,7 @@ class TimeScheduleInfoTest {
         void startDate_isLaterThanEndDate_willThrowInvalidDateRangeException(String testTitle, String startSample, String endSample) {
 
             // given
-            TimeScheduleInfo changeTarget = TimeScheduleInfo.builder()
+            DateTimeScheduleInfo changeTarget = DateTimeScheduleInfo.builder()
                 .startDateTime(LocalDateTime.of(2022, 1, 1, 0, 0))
                 .endDateTime(LocalDateTime.of(2023, 1, 1, 0, 0))
                 .build();

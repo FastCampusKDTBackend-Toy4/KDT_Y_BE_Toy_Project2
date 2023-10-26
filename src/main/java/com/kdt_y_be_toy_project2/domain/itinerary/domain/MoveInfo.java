@@ -1,8 +1,7 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.domain;
 
-import com.kdt_y_be_toy_project2.domain.itinerary.dto.MoveInfoRequest;
 import com.kdt_y_be_toy_project2.domain.model.PlaceInfo;
-import com.kdt_y_be_toy_project2.domain.model.TimeScheduleInfo;
+import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +17,7 @@ public class MoveInfo {
             @AttributeOverride(name = "startDateTime", column = @Column(name = "move_start_date_time")),
             @AttributeOverride(name = "endDateTime", column = @Column(name = "move_end_date_time"))
     })
-    private TimeScheduleInfo moveSchedule;
+    private DateTimeScheduleInfo moveSchedule;
 
     @Embedded
     @AttributeOverrides({
