@@ -29,15 +29,16 @@ public class Trip {
     @Enumerated(EnumType.STRING)
     private TripType tripType;
 
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Itinerary> itineraries;
+
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "start_date_time", column = @Column(name = "startDateTime", nullable = false)),
-        @AttributeOverride(name = "end_date_time", column = @Column(name = "endDateTime", nullable = false))
+            @AttributeOverride(name = "start_date_time", column = @Column(name = "startDateTime", nullable = false)),
+            @AttributeOverride(name = "end_date_time", column = @Column(name = "endDateTime", nullable = false))
     })
     private TimeScheduleInfo tripSchedule;
 
-    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Itinerary> itineraries;
 
     @Builder
     private Trip(Long id, String name, TripType tripType, TimeScheduleInfo tripSchedule) {

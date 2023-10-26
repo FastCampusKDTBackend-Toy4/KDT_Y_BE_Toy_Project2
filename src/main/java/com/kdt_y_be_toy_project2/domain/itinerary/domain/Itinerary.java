@@ -1,6 +1,6 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.domain;
 
-import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryDTO;
+
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,7 +19,7 @@ public class Itinerary {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "trip")
+    @JoinColumn(name="trip")
     private Trip trip;
 
     //체류 정보, 이동 정보, 숙소 정보
@@ -32,12 +32,10 @@ public class Itinerary {
     @Embedded
     private AccommodationInfo accommodationInfo;
 
-    public static Itinerary to(ItineraryDTO itineraryDTO) {
-        return Itinerary.builder()
-                .id(itineraryDTO.id())
-                .stayInfo(StayInfo.to(itineraryDTO.stayInfoDTO()))
-                .moveInfo(MoveInfo.to(itineraryDTO.moveInfoDTO()))
-                .accommodationInfo(AccommodationInfo.to(itineraryDTO.accommodationInfoDTO()))
-                .build();
+    public Itinerary update(Itinerary itinerary) {
+        this.stayInfo = itinerary.stayInfo;
+        this.moveInfo = itinerary.moveInfo;
+        this.accommodationInfo = itinerary.accommodationInfo;
+        return this;
     }
 }
