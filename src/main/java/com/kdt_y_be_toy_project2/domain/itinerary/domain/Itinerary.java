@@ -19,7 +19,7 @@ public class Itinerary {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "trip")
+    @JoinColumn(name="trip")
     private Trip trip;
 
     //체류 정보, 이동 정보, 숙소 정보
