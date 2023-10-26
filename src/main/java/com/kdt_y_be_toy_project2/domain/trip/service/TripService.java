@@ -5,6 +5,7 @@ import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripNotFoundException;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,12 @@ public class TripService {
 
     @Transactional(readOnly = true)
     public List<TripResponse> getAllTrips() {
-        return tripRepository.findAll()
+        List<Trip> trips = tripRepository.findAll();
+
+        if (trips.isEmpty()) {
+            throw new TripNotFoundException();
+        }
+        return trips
                 .stream().map(TripResponse::from)
                 .toList();
     }
@@ -34,7 +40,9 @@ public class TripService {
     }
 
     public TripResponse createTrip(final TripRequest request) {
+        request.timeScheduleInfo().isDateTimeValid();
         Trip newTrip = TripRequest.toEntity(request);
+
         return Optional.of(tripRepository.save(newTrip))
                 .map(TripResponse::from)
                 .orElseThrow();
@@ -44,11 +52,9 @@ public class TripService {
         Trip updatedTrip = tripRepository.findById(tripId)
                 .map(trip -> trip.update(TripRequest.toEntity(request)))
                 .orElseThrow(TripNotFoundException::new);
+
         return Optional.of(tripRepository.save(updatedTrip))
                 .map(TripResponse::from)
                 .orElseThrow();
     }
 }
-
-
-
