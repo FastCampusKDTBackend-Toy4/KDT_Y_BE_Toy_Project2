@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -38,12 +39,14 @@ public class Trip {
     })
     private TimeScheduleInfo tripSchedule;
 
+
     @Builder
     private Trip(Long id, String name, TripType tripType, TimeScheduleInfo tripSchedule) {
         this.id = id;
         this.name = name;
         this.tripType = tripType;
         this.tripSchedule = tripSchedule;
+        this.itineraries = new ArrayList<>();
     }
 
     public Trip update(Trip trip) {

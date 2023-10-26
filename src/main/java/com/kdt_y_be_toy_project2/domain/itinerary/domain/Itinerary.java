@@ -1,5 +1,6 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.domain;
 
+
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +19,7 @@ public class Itinerary {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name="trip")
+    @JoinColumn(name = "trip")
     private Trip trip;
 
     //체류 정보, 이동 정보, 숙소 정보

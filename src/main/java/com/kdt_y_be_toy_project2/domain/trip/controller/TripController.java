@@ -1,6 +1,7 @@
 package com.kdt_y_be_toy_project2.domain.trip.controller;
 
-import com.kdt_y_be_toy_project2.domain.trip.dto.*;
+import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
+import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.service.TripService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +19,14 @@ public class TripController {
     private final TripService tripService;
 
     @GetMapping
-    public ResponseEntity<List<GetTripResponse>> getAllTrips() {
+    public ResponseEntity<List<TripResponse>> getAllTrips() {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(tripService.getAllTrips());
     }
 
     @GetMapping("/{trip_id}")
-    public ResponseEntity<GetTripResponse> getTripById(
+    public ResponseEntity<TripResponse> getTripById(
             @PathVariable(name = "trip_id") final Long tripId
     ) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -34,8 +35,8 @@ public class TripController {
     }
 
     @PostMapping
-    public ResponseEntity<CreateTripResponse> createTrip(
-            @Valid @RequestBody final CreateTripRequest request
+    public ResponseEntity<TripResponse> createTrip(
+            @Valid @RequestBody final TripRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -43,9 +44,9 @@ public class TripController {
     }
 
     @PutMapping("/{trip_id}")
-    public ResponseEntity<EditTripResponse> editTrip(
+    public ResponseEntity<TripResponse> editTrip(
             @PathVariable(name = "trip_id") final Long tripId,
-            @Valid @RequestBody final EditTripRequest request
+            @Valid @RequestBody final TripRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
