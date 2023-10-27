@@ -2,7 +2,7 @@ package com.kdt_y_be_toy_project2.domain.trip.dto;
 
 import java.util.List;
 
-import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.global.util.DateTimeUtil;
 
@@ -22,7 +22,7 @@ public record TripResponse(
 	@Schema(description = "여행 국내외여부")
 	String tripType,
 	@Schema(description = "여행에 포함된 여정 리스트")
-	List<Itinerary> itineraries
+	List<ItineraryResponse> itineraries
 ) {
 	public static TripResponse from(Trip trip) {
 		return TripResponse.builder()
@@ -31,7 +31,7 @@ public record TripResponse(
 			.startDate(DateTimeUtil.toString(trip.getTripSchedule().getStartDate()))
 			.endDate(DateTimeUtil.toString(trip.getTripSchedule().getEndDate()))
 			.tripType(trip.getTripType().getValue())
-			.itineraries(trip.getItineraries())
+			.itineraries(trip.getItineraries().stream().map(ItineraryResponse::from).toList())
 			.build();
 	}
 }
