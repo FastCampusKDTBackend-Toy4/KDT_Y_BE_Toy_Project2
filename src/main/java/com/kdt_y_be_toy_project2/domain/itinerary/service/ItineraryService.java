@@ -10,6 +10,7 @@ import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundExceptio
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
+import com.kdt_y_be_toy_project2.global.util.LocalDateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,20 +76,20 @@ public class ItineraryService {
         LocalDateTime tripStartTime = trip.getTripSchedule().getStartDate().atStartOfDay();
         LocalDateTime tripEndTime = trip.getTripSchedule().getEndDate().atStartOfDay();
 
-        if(     itinerary.stayInfoRequest().startDateTime().isBefore(tripStartTime) ||
-                itinerary.accommodationInfoRequest().startDateTime().isBefore(tripStartTime) ||
-                itinerary.moveInfoRequest().startDateTime().isBefore(tripStartTime) ||
-                itinerary.stayInfoRequest().endDateTime().isAfter(tripEndTime) ||
-                itinerary.accommodationInfoRequest().endDateTime().isAfter(tripEndTime) ||
-                itinerary.moveInfoRequest().endDateTime().isAfter(tripEndTime)
+        if(LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().startDateTime()).isBefore(tripStartTime) ||
+                LocalDateTimeUtil.toLocalDateTime(itinerary.accommodationInfoRequest().startDateTime()).isBefore(tripStartTime) ||
+                LocalDateTimeUtil.toLocalDateTime(itinerary.moveInfoRequest().startDateTime()).isBefore(tripStartTime) ||
+                LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().endDateTime()).isAfter(tripEndTime) ||
+                LocalDateTimeUtil.toLocalDateTime(itinerary.accommodationInfoRequest().endDateTime()).isAfter(tripEndTime) ||
+                LocalDateTimeUtil.toLocalDateTime(itinerary.moveInfoRequest().endDateTime()).isAfter(tripEndTime)
         ) throw new InvalidItineraryDurationException();
     }
 
     void checkInvalidDate(ItineraryRequest itinerary){
 
-        if(     itinerary.moveInfoRequest().startDateTime().isAfter(itinerary.moveInfoRequest().endDateTime()) ||
-                itinerary.accommodationInfoRequest().startDateTime().isAfter(itinerary.accommodationInfoRequest().endDateTime()) ||
-                itinerary.stayInfoRequest().startDateTime().isAfter(itinerary.stayInfoRequest().endDateTime())
+        if(     LocalDateTimeUtil.toLocalDateTime(itinerary.moveInfoRequest().startDateTime()).isAfter(LocalDateTimeUtil.toLocalDateTime(itinerary.moveInfoRequest().endDateTime())) ||
+                LocalDateTimeUtil.toLocalDateTime(itinerary.accommodationInfoRequest().startDateTime()).isAfter(LocalDateTimeUtil.toLocalDateTime(itinerary.accommodationInfoRequest().endDateTime())) ||
+                LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().startDateTime()).isAfter(LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().endDateTime()))
         ) throw new InvalidDateException();
     }
 }
