@@ -9,7 +9,6 @@ import lombok.Builder;
 
 @Builder
 public record ItineraryRequest(
-        Long id,
         StayInfoRequest stayInfoRequest,
         MoveInfoRequest moveInfoRequest,
         AccommodationInfoRequest accommodationInfoRequest
@@ -17,7 +16,6 @@ public record ItineraryRequest(
 
     public static Itinerary toEntity(final ItineraryRequest itineraryRequest, Trip trip) {
         return Itinerary.builder()
-                .id(itineraryRequest.id())
                 .trip(trip)
                 .stayInfo(StayInfoRequest.to(itineraryRequest.stayInfoRequest()))
                 .moveInfo(MoveInfoRequest.to(itineraryRequest.moveInfoRequest()))
