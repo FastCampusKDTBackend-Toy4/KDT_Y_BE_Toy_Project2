@@ -58,9 +58,11 @@ public class ItineraryService {
         return ItineraryResponse.from(savedItinerary);
     }
 
-    public ItineraryResponse editItinerary(final Long itinerary_id, final ItineraryRequest request) {
+    public ItineraryResponse editItinerary(final Long tripId, final Long itineraryId, final ItineraryRequest request) {
 
-        Itinerary updatedItinerary = itineraryRepository.findById(itinerary_id)
+        Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
+
+        Itinerary updatedItinerary = itineraryRepository.findById(itineraryId)
                 .map(itinerary -> itinerary.update(ItineraryRequest.toEntity(request, itinerary.getTrip())))
                 .orElseThrow(() -> new ItineraryNotFoundException());
 

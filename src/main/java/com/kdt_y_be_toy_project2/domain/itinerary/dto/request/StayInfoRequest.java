@@ -4,6 +4,7 @@ import com.kdt_y_be_toy_project2.domain.itinerary.domain.StayInfo;
 import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.model.PlaceInfo;
 import com.kdt_y_be_toy_project2.global.util.LocalDateTimeUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -12,15 +13,18 @@ import lombok.Builder;
 
 @Builder
 public record StayInfoRequest(
-        @NotNull(message = "휴식 시작 시간을 입력해야 합니다. (예: 2023-10-25 12:00)")
+        @NotNull(message = "여가 시작 시간을 입력해야 합니다. (예: 2023-10-25 12:00)")
         @Pattern(regexp = LocalDateTimeUtil.LOCAL_DATE_TIME_REGEX, message = "잘못된 시간 형식입니다. (올바른 예시: 2023-10-25 12:30)")
+        @Schema(description = "여가 시작 시간")
         String startDateTime,
 
-        @NotNull(message = "휴식 종료 시간을 입력해야 합니다. (예: 2023-10-25 12:00)")
+        @NotNull(message = "여가 종료 시간을 입력해야 합니다. (예: 2023-10-25 12:00)")
         @Pattern(regexp = LocalDateTimeUtil.LOCAL_DATE_TIME_REGEX, message = "잘못된 시간 형식입니다. (올바른 예시: 2023-10-25 12:30)")
+        @Schema(description = "여가 종료 시간")
         String endDateTime,
 
-        @NotBlank(message = "휴식지를 입력해야 합니다.")
+        @NotBlank(message = "여가 장소를 입력해야 합니다.")
+        @Schema(description = "여가 장소")
         String stayPlaceName
 ) {
     public static StayInfo to(final StayInfoRequest stayInfoRequest) {

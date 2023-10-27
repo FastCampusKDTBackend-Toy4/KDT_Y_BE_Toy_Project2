@@ -4,14 +4,22 @@ import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.response.AccommodationInfoResponse;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.response.MoveInfoResponse;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.response.StayInfoResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-public record ItineraryResponse (
+@Schema(description = "여정 응답")
+public record ItineraryResponse(
+        @Schema(description = "여정 ID")
         Long id,
-        AccommodationInfoResponse accommodationInfoResponse,
+        @Schema(description = "여가 계획")
+        StayInfoResponse stayInfoResponse,
+
+        @Schema(description = "이동 계획")
         MoveInfoResponse moveInfoResponse,
-        StayInfoResponse stayInfoResponse
+
+        @Schema(description = "숙박 계획")
+        AccommodationInfoResponse accommodationInfoResponse
 ) {
 
     public static ItineraryResponse from(final Itinerary itinerary) {
