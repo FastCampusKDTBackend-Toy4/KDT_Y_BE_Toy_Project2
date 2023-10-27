@@ -22,5 +22,4 @@ public record ItineraryRequest(
     public static Itinerary toEntity(final ItineraryRequest itineraryRequest, Trip trip) {
         return Itinerary.builder().trip(trip).stayInfo(StayInfoRequest.to(itineraryRequest.stayInfoRequest())).moveInfo(MoveInfoRequest.to(itineraryRequest.moveInfoRequest())).accommodationInfo(AccommodationInfoRequest.to(itineraryRequest.accommodationInfoRequest())).build();
     }
-
 }

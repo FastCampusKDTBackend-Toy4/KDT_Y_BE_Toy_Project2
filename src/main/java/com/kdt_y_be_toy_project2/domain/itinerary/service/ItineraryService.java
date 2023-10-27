@@ -41,22 +41,15 @@ public class ItineraryService {
 
     @Transactional(readOnly = true)
     public ItineraryResponse getItineraryById(final Long tripId, final Long itineraryId) {
-        Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
 
-        for (Itinerary itinerary : retrivedTrip.getItineraries()) {
-            if (itinerary.getId() == itineraryId) {
-                return ItineraryResponse
-                        .from(itineraryRepository
-                                .findById(itineraryId)
-                                .orElseThrow(() -> new ItineraryNotFoundException()));
-            }
-        }
-        throw new ItineraryNotFoundException();
+        Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
+        return ItineraryResponse.from(itineraryRepository.findById(itineraryId).orElseThrow(ItineraryNotFoundException::new));
+
     }
 
     public ItineraryResponse createItinerary(final Long tripId, final ItineraryRequest request) {
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
-        checkItineraryDuration(retrivedTrip, request);
+                                           checkItineraryDuration(retrivedTrip, request);
         checkInvalidDate(request);
         Itinerary savedItinerary = itineraryRepository.save(ItineraryRequest.toEntity(request, retrivedTrip));
         retrivedTrip.getItineraries().add(savedItinerary);

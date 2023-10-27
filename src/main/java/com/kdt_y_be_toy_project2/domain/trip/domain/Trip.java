@@ -1,5 +1,6 @@
 package com.kdt_y_be_toy_project2.domain.trip.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
 import com.kdt_y_be_toy_project2.domain.model.DateScheduleInfo;
 import jakarta.persistence.*;

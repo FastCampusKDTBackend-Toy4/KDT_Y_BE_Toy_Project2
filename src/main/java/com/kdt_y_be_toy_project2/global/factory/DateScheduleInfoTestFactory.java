@@ -28,23 +28,4 @@ public class DateScheduleInfoTestFactory {
                 .build();
     }
 
-    public static DateTimeScheduleInfo createRandom2() {
-        return createRandom2(LocalDateTime.now());
-    }
-
-    public static DateTimeScheduleInfo createRandom2(LocalDateTime baseDateTime) {
-
-        long randomDaysToAddForStartDate = ThreadLocalRandom.current().nextLong(365);
-        LocalDateTime startDateTime = baseDateTime.minusDays(randomDaysToAddForStartDate);
-
-        long randomDaysToAddForEndDate = ThreadLocalRandom.current().nextLong(365) + 1;
-        LocalDateTime endDateTime = startDateTime.plusDays(randomDaysToAddForEndDate);
-
-        return DateTimeScheduleInfo.builder()
-                .startDateTime(startDateTime)
-                .endDateTime(endDateTime)
-                .build();
-    }
-
-
 }
