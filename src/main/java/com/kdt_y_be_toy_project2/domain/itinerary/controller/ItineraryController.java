@@ -57,7 +57,7 @@ public class ItineraryController {
     @PostMapping("/trips/{trip_id}/itineraries")
     @Operation(summary = "여정 추가", description = "특정 여행에 여정을 추가합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "여정 추가 성공",content = @Content(schema = @Schema(implementation = ItineraryResponse.class))),
+            @ApiResponse(responseCode = "201", description = "여정 추가 성공",content = @Content(schema = @Schema(implementation = ItineraryResponse.class))),
             @ApiResponse(responseCode = "404", description = "여행 ID와 매칭되는 여행이 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "400", description = "여행 일정 안에 여정이 들어갈 수 없습니다. (여정이 여행 일정 범위 밖에 있습니다.)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 
@@ -66,7 +66,7 @@ public class ItineraryController {
             @Parameter(description = "여행 ID") @PathVariable(name = "trip_id") final Long tripId,
             @Parameter(description = "여정 요청 객체") @RequestBody final ItineraryRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.OK)
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(itineraryService.createItinerary(tripId, request));
     }
 

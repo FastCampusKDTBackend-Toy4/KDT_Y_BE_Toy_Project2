@@ -29,8 +29,14 @@ public class ItineraryService {
 
     @Transactional(readOnly = true)
     public List<ItineraryResponse> getAllItineraries(final Long tripId) {
-        return tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new)
+
+        List<ItineraryResponse> itineraryResponses = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new)
                 .getItineraries().stream().map(itinerary -> ItineraryResponse.from(itinerary)).toList();
+
+        if (itineraryResponses.size() == 0) {
+            throw new ItineraryNotFoundException();
+        }
+        return itineraryResponses;
     }
 
     @Transactional(readOnly = true)
@@ -76,7 +82,7 @@ public class ItineraryService {
 
     void checkItineraryDuration(Trip trip, ItineraryRequest itinerary){
         LocalDateTime tripStartTime = trip.getTripSchedule().getStartDate().atStartOfDay();
-        LocalDateTime tripEndTime = trip.getTripSchedule().getEndDate().atStartOfDay();
+        LocalDateTime tripEndTime = trip.getTripSchedule().getEndDate().atStartOfDay().plusDays(1);
 
         if(LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().startDateTime()).isBefore(tripStartTime) ||
                 LocalDateTimeUtil.toLocalDateTime(itinerary.accommodationInfoRequest().startDateTime()).isBefore(tripStartTime) ||
