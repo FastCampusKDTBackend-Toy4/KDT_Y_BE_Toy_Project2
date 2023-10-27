@@ -18,7 +18,7 @@ public class Itinerary {
     @Column(name = "id", updatable = false)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name="trip")
     private Trip trip;
 
