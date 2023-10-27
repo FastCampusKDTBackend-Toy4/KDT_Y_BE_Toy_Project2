@@ -42,7 +42,7 @@ class TripControllerTest {
 
 	private void assertTripResponse(Trip expectedTrip, ResultActions resultActions) throws Exception {
 		// then
-		resultActions.andExpect(status().isOk())
+		resultActions
 			.andDo(print())
 			.andExpect(jsonPath("$.tripName").value(expectedTrip.getName()))
 			.andExpect(jsonPath("$.tripType").value(expectedTrip.getTripType().getValue()))
@@ -92,6 +92,7 @@ class TripControllerTest {
 			ResultActions getTripAction = mockMvc.perform(get("/v1/trips/" + tripId));
 
 			// then
+			getTripAction.andExpect(status().isOk());
 			assertTripResponse(expectedTrip, getTripAction);
 		}
 	}
@@ -120,6 +121,7 @@ class TripControllerTest {
 				.content(objectMapper.writeValueAsString(request)));
 
 			// then
+			createTripAction.andExpect(status().isCreated());
 			assertTripResponse(expectedTrip, createTripAction);
 		}
 	}
