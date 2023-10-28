@@ -3,7 +3,10 @@ package com.kdt_y_be_toy_project2.domain.itinerary.service;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
-import com.kdt_y_be_toy_project2.domain.itinerary.exception.*;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidDateException;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidItineraryDurationException;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.ItineraryNotFoundException;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundException;
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
@@ -27,10 +30,6 @@ public class ItineraryService {
     @Transactional(readOnly = true)
     public List<ItineraryResponse> getAllItineraries(final Long tripId) {
 
-        if (tripId == null) {
-            throw new InvalidRequestException();
-        }
-
         List<ItineraryResponse> itineraryResponses = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new)
                 .getItineraries().stream().map(itinerary -> ItineraryResponse.from(itinerary)).toList();
 
@@ -42,10 +41,6 @@ public class ItineraryService {
 
     @Transactional(readOnly = true)
     public ItineraryResponse getItineraryById(final Long tripId, final Long itineraryId) {
-
-        if (tripId == null || itineraryId == null) {
-            throw new InvalidRequestException();
-        }
 
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
 
@@ -62,10 +57,6 @@ public class ItineraryService {
 
     public ItineraryResponse createItinerary(final Long tripId, final ItineraryRequest request) {
 
-        if (tripId == null || request == null) {
-            throw new InvalidRequestException();
-        }
-
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
         checkItineraryDuration(retrivedTrip, request);
         checkInvalidDate(request);
@@ -76,10 +67,6 @@ public class ItineraryService {
     }
 
     public ItineraryResponse editItinerary(final Long tripId, final Long itineraryId, final ItineraryRequest request) {
-
-        if (tripId == null || itineraryId == null || request == null) {
-            throw new InvalidRequestException();
-        }
 
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
 

@@ -6,15 +6,19 @@ import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.MoveInfoRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.StayInfoRequest;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
 @Schema(description = "여정 요청")
 public record ItineraryRequest(
+        @NotNull
         @Schema(description = "여가 계획")
         StayInfoRequest stayInfoRequest,
+        @NotNull
         @Schema(description = "이동 계획")
         MoveInfoRequest moveInfoRequest,
+        @NotNull
         @Schema(description = "숙박 계획")
         AccommodationInfoRequest accommodationInfoRequest)
 {

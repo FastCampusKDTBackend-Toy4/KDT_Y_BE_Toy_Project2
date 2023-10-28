@@ -120,7 +120,7 @@ class ItineraryControllerTest {
         void shouldSuccessToGetAllItineraries() throws Exception {
             // when
 
-            ResultActions getAllItinerariesAction = mockMvc.perform(get("/v1/trips/" + tripId + "/itineraries"));
+            ResultActions getAllItinerariesAction = mockMvc.perform(get("/v1/trips/" + null + "/itineraries"));
 
             // then
             getAllItinerariesAction
