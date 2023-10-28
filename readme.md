@@ -70,7 +70,7 @@ http://localhost:8080/swagger-ui/index.html
 
 다음 포스트맨에서도 API 문서를 확인해 보실 수 있습니다.
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://bold-satellite-6982.postman.co/collection/828796-21baed3c-6dbd-4771-828f-55587cab65e4?source=rip_markdown)
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://documenter.getpostman.com/view/828796/2s9YRGx9N9)
 
 ## 📐 ERD 설계도
 

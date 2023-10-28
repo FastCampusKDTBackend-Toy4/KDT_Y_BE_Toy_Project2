@@ -6,9 +6,9 @@
 
 ## 포스트맨 캡쳐 화면
 
-자세한 사항은 아래 링크에서 확인해보실 수 있습니다.
+자세한 사항은 아래 링크에서도 확인해보실 수 있습니다.
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://bold-satellite-6982.postman.co/collection/828796-21baed3c-6dbd-4771-828f-55587cab65e4?source=rip_markdown)
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://documenter.getpostman.com/view/828796/2s9YRGx9N9)
 
 ### 여행
 
