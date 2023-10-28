@@ -1,8 +1,6 @@
 spring:
   config:
     import: optional:file:.env[.properties]
-  profiles:
-    active: dev
 
   datasource:
     url: jdbc:mysql://localhost:${LOCAL_MYSQL_PORT}/fc_sns?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true
@@ -16,6 +14,4 @@ spring:
       format_sql: true
       dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: create
-
-
+      ddl-auto: validate
