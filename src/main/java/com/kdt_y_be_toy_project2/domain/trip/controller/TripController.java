@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -78,7 +77,7 @@ public class TripController {
 	public ResponseEntity<TripResponse> createTrip(
 		@Valid @RequestBody final TripRequest request
 	) {
-		return ResponseEntity.status(HttpStatus.OK)
+		return ResponseEntity.status(HttpStatus.CREATED)
 			.contentType(MediaType.APPLICATION_JSON)
 			.body(tripService.createTrip(request));
 	}
