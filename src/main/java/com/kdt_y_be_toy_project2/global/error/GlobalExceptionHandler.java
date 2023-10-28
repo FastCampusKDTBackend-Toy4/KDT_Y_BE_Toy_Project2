@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler
-	public ResponseEntity<ErrorResponse> handleInternalServerError(BindException ex) {
+	public ResponseEntity<ErrorResponse> handleBindValidationError(BindException ex) {
 		log.error(ex.getMessage(), ex);
 		List<String> messages = ex.getAllErrors().stream()
 			.map(DefaultMessageSourceResolvable::getDefaultMessage)

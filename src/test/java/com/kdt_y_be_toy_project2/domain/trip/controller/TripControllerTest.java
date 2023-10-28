@@ -54,20 +54,6 @@ class TripControllerTest {
 				));
 	}
 
-	// // 아래 테스트를 수행하려면, 여행 리스트가 비어 있어야 되기 때문에 독립적으로 수행되어야 합니다.
-	// @DisplayName("모든 여행 정보를 가져올 때 여행 정보 리스트가 비어 있을 경우 에러를 반환한다.")
-	// @Disabled
-	// @Test
-	// void shouldFailToGetAllTripsWithEmptyList() throws Exception {
-	// 	// when
-	// 	ResultActions getAllTripsAction = mockMvc.perform(get("/v1/trips"));
-	//
-	// 	// then
-	// 	getAllTripsAction
-	// 		.andExpect(status().isNotFound())
-	// 		.andExpect(jsonPath("message").value("여행 정보를 찾을 수 없습니다."));
-	// }
-
 	@DisplayName("여행 정보를 조회할 때")
 	@Nested
 	class GetTripsTest {
