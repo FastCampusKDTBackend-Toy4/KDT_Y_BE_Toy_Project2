@@ -16,6 +16,7 @@ import com.kdt_y_be_toy_project2.domain.itinerary.service.ItineraryService;
 import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
+import com.kdt_y_be_toy_project2.global.factory.DateTimeScheduleInfoTestFactory;
 import com.kdt_y_be_toy_project2.global.factory.ItineraryFactory;
 import com.kdt_y_be_toy_project2.global.factory.TripTestFactory;
 import com.kdt_y_be_toy_project2.global.util.LocalDateTimeUtil;
@@ -182,11 +183,13 @@ class ItineraryControllerTest {
             // given
             trip = tripRepository.save(TripTestFactory.createTestTrip());
             Itinerary savedItinerary = itineraryRepository.save(ItineraryFactory.createTestItinerary(trip));
+            trip.getItineraries().add(savedItinerary);
 
             long tripId = trip.getId();
             ItineraryRequest request = buildItineraryRequest(DateTimeScheduleInfo.builder()
                     .startDateTime(LocalDateTime.from(trip.getTripSchedule().getStartDate().atStartOfDay()))
                     .endDateTime(LocalDateTime.from(trip.getTripSchedule().getEndDate().atStartOfDay())).build());
+
 
             long savedItineraryId = savedItinerary.getId();
 

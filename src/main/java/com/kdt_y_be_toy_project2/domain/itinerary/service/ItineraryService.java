@@ -3,10 +3,7 @@ package com.kdt_y_be_toy_project2.domain.itinerary.service;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
-import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidDateException;
-import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidItineraryDurationException;
-import com.kdt_y_be_toy_project2.domain.itinerary.exception.ItineraryNotFoundException;
-import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundException;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.*;
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
@@ -30,6 +27,10 @@ public class ItineraryService {
     @Transactional(readOnly = true)
     public List<ItineraryResponse> getAllItineraries(final Long tripId) {
 
+        if (tripId == null) {
+            throw new InvalidRequestException();
+        }
+
         List<ItineraryResponse> itineraryResponses = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new)
                 .getItineraries().stream().map(itinerary -> ItineraryResponse.from(itinerary)).toList();
 
@@ -42,42 +43,66 @@ public class ItineraryService {
     @Transactional(readOnly = true)
     public ItineraryResponse getItineraryById(final Long tripId, final Long itineraryId) {
 
-        Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
-        return ItineraryResponse.from(itineraryRepository.findById(itineraryId).orElseThrow(ItineraryNotFoundException::new));
+        if (tripId == null || itineraryId == null) {
+            throw new InvalidRequestException();
+        }
 
+        Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
+
+        for (Itinerary itinerary : retrivedTrip.getItineraries()) {
+            if (itinerary.getId().equals(itineraryId)) {
+                return Optional.of(itinerary)
+                        .map(ItineraryResponse::from)
+                        .orElseThrow();
+            }
+        }
+
+        throw new ItineraryNotFoundException();
     }
 
     public ItineraryResponse createItinerary(final Long tripId, final ItineraryRequest request) {
+
+        if (tripId == null || request == null) {
+            throw new InvalidRequestException();
+        }
+
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
-                                           checkItineraryDuration(retrivedTrip, request);
+        checkItineraryDuration(retrivedTrip, request);
         checkInvalidDate(request);
-        Itinerary savedItinerary = itineraryRepository.save(ItineraryRequest.toEntity(request, retrivedTrip));
+        Itinerary savedItinerary = Optional.of(itineraryRepository.save(ItineraryRequest.toEntity(request, retrivedTrip))).orElseThrow();
         retrivedTrip.getItineraries().add(savedItinerary);
 
-        return ItineraryResponse.from(savedItinerary);
+        return Optional.of(ItineraryResponse.from(savedItinerary)).orElseThrow();
     }
 
     public ItineraryResponse editItinerary(final Long tripId, final Long itineraryId, final ItineraryRequest request) {
 
+        if (tripId == null || itineraryId == null || request == null) {
+            throw new InvalidRequestException();
+        }
+
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
 
-        Itinerary updatedItinerary = itineraryRepository.findById(itineraryId)
-                .map(itinerary -> itinerary.update(ItineraryRequest.toEntity(request, itinerary.getTrip())))
-                .orElseThrow(() -> new ItineraryNotFoundException());
+        for (Itinerary itinerary : retrivedTrip.getItineraries()) {
+            if (itinerary.getId().equals(itineraryId)) {
+                itinerary.update(ItineraryRequest.toEntity(request, retrivedTrip));
+                checkItineraryDuration(itinerary.getTrip(), request);
+                checkInvalidDate(request);
 
-        checkItineraryDuration(updatedItinerary.getTrip(), request);
-        checkInvalidDate(request);
+                return Optional.of(itineraryRepository.save(itinerary))
+                        .map(ItineraryResponse::from)
+                        .orElseThrow();
+            }
+        }
 
-        return Optional.of(itineraryRepository.save(updatedItinerary))
-                .map(ItineraryResponse::from)
-                .orElseThrow();
+        throw new ItineraryNotFoundException();
     }
 
-    void checkItineraryDuration(Trip trip, ItineraryRequest itinerary){
+    void checkItineraryDuration(Trip trip, ItineraryRequest itinerary) {
         LocalDateTime tripStartTime = trip.getTripSchedule().getStartDate().atStartOfDay();
         LocalDateTime tripEndTime = trip.getTripSchedule().getEndDate().atStartOfDay().plusDays(1);
 
-        if(LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().startDateTime()).isBefore(tripStartTime) ||
+        if (LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().startDateTime()).isBefore(tripStartTime) ||
                 LocalDateTimeUtil.toLocalDateTime(itinerary.accommodationInfoRequest().startDateTime()).isBefore(tripStartTime) ||
                 LocalDateTimeUtil.toLocalDateTime(itinerary.moveInfoRequest().startDateTime()).isBefore(tripStartTime) ||
                 LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().endDateTime()).isAfter(tripEndTime) ||
@@ -86,9 +111,9 @@ public class ItineraryService {
         ) throw new InvalidItineraryDurationException();
     }
 
-    void checkInvalidDate(ItineraryRequest itinerary){
+    void checkInvalidDate(ItineraryRequest itinerary) {
 
-        if(     LocalDateTimeUtil.toLocalDateTime(itinerary.moveInfoRequest().startDateTime()).isAfter(LocalDateTimeUtil.toLocalDateTime(itinerary.moveInfoRequest().endDateTime())) ||
+        if (LocalDateTimeUtil.toLocalDateTime(itinerary.moveInfoRequest().startDateTime()).isAfter(LocalDateTimeUtil.toLocalDateTime(itinerary.moveInfoRequest().endDateTime())) ||
                 LocalDateTimeUtil.toLocalDateTime(itinerary.accommodationInfoRequest().startDateTime()).isAfter(LocalDateTimeUtil.toLocalDateTime(itinerary.accommodationInfoRequest().endDateTime())) ||
                 LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().startDateTime()).isAfter(LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().endDateTime()))
         ) throw new InvalidDateException();
