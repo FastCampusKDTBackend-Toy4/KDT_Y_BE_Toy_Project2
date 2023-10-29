@@ -9,7 +9,6 @@ spring:
     password: ${LOCAL_MYSQL_PASSWORD}
 
   jpa:
-    show-sql: true
     properties:
       format_sql: true
       dialect: org.hibernate.dialect.MySQL8Dialect
