@@ -115,13 +115,16 @@ http://localhost:8080/swagger-ui/index.html
     │   │               ├── error
     │   │               └── util
     │   └── resources
-    │       ├── application.properties
+    │       └── application*.properties
     └── test
         └── java
             └── com
                 └── kdt_y_be_toy_project2
+                    ├── integeration
                     ├── domain
                     │   ├── trip
+                    │   │   └── controller
+                    │   ├── itinerary
                     │   │   └── controller
                     │   └── model
                     └── global
