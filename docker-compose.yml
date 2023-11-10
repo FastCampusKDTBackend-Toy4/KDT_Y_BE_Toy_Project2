@@ -19,13 +19,11 @@ services:
       - ${LOCAL_MYSQL_VOLUME_PATH}:/var/lib/mysql
     ports:
       - ${LOCAL_MYSQL_PORT}:3306
-  # 레디스 추가?
   redis:
+    container_name: toy3-redis
     image: redis:7.2
-    ports: # 바인딩할 포트:내부 포트
-      - ${LOCAL_REDIS_PORT}:6379
-    command: redis-server /usr/local/etc/redis/redis.conf
-    volumes: # 마운트할 볼륨 설정
+    command: redis-server --port 6379
+    volumes:
       - ${LOCAL_REDIS_VOLUME_PATH}:/data
-      - ${LOCAL_REDIS_CONFIG_PATH}:/usr/local/etc/redis/redis.conf
-    restart: always
+    ports:
+      - ${LOCAL_REDIS_PORT}:6379
