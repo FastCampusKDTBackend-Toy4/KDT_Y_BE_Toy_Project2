@@ -11,7 +11,7 @@ services:
       - --collation-server=utf8mb4_unicode_ci
     environment:
       MYSQL_ROOT_PASSWORD: ${LOCAL_MYSQL_ROOT_PASSWORD}
-      MYSQL_USERNAME: ${LOCAL_MYSQL_USERNAME}
+      MYSQL_USER: ${LOCAL_MYSQL_USERNAME}
       MYSQL_PASSWORD: ${LOCAL_MYSQL_PASSWORD}
       MYSQL_DATABASE: fc_sns
       TZ: Asia/Seoul
