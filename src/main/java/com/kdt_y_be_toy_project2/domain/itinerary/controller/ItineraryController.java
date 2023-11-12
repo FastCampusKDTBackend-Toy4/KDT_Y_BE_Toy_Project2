@@ -12,19 +12,21 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.kdt_y_be_toy_project2.global.error.ErrorResponse;
 
 import java.util.List;
-
 @RestController
 @RequestMapping("/v1")
 @RequiredArgsConstructor
 @Tag(name = "여정 ", description = "여정 관련 api입니다.")
 public class ItineraryController {
     private final ItineraryService itineraryService;
+
 
     @GetMapping("/trips/{trip_id}/itineraries")
     @Operation(summary = "여정 리스트 조회", description = "특정 여행과 관련된 모든 여정을 조회합니다.", parameters = {})
