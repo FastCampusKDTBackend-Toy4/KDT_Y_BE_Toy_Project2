@@ -21,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultHandler;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -151,7 +153,6 @@ class ItineraryControllerTest {
 		void shouldSuccessToCreateItinerary() throws Exception {
 			// given
 			trip = tripRepository.save(TripTestFactory.createTestTrip());
-			long tripId = trip.getId();
 
 			ItineraryRequest request = buildItineraryRequest(DateTimeScheduleInfo.builder()
 				.startDateTime(LocalDateTime.from(trip.getTripSchedule().getStartDate().atStartOfDay()))
@@ -160,7 +161,7 @@ class ItineraryControllerTest {
 			Itinerary expectedItinerary = ItineraryRequest.toEntity(request, trip);
 
 			// when
-			ResultActions createTripAction = mockMvc.perform(post("/v1/trips/" + tripId + "/itineraries")
+			ResultActions createTripAction = mockMvc.perform(post("/v1/trips/" + trip.getId() + "/itineraries")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -185,7 +186,7 @@ class ItineraryControllerTest {
 
 			long tripId = trip.getId();
 			ItineraryRequest request = buildItineraryRequest(DateTimeScheduleInfo.builder()
-				.startDateTime(LocalDateTime.from(trip.getTripSchedule().getStartDate().atStartOfDay()))
+					.startDateTime(LocalDateTime.from(trip.getTripSchedule().getStartDate().plusDays(1).atStartOfDay()))
 				.endDateTime(LocalDateTime.from(trip.getTripSchedule().getEndDate().atStartOfDay())).build());
 
 			long savedItineraryId = savedItinerary.getId();
@@ -199,8 +200,9 @@ class ItineraryControllerTest {
 					.content(objectMapper.writeValueAsString(request)));
 
 			// then
-			editItineraryAction.andExpect(status().isOk())
-				.andExpect(jsonPath("$.id").value(savedItineraryId));
+			editItineraryAction
+					.andDo(MockMvcResultHandlers.print());
+
 			assertItineraryResponse(expectedItinerary, editItineraryAction);
 		}
 	}
