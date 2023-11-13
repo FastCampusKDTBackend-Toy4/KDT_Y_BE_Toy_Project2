@@ -14,6 +14,7 @@ import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripSearchRequest;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripNotFoundException;
+import com.kdt_y_be_toy_project2.domain.trip.exception.TripSearchIllegalArgumentException;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -71,6 +72,10 @@ public class TripService {
 	}
 
 	private void validateSearchTripRequest(TripSearchRequest request) {
+		if (request.isAllNull()) {
+			throw new TripSearchIllegalArgumentException();
+		}
+
 		if (isAllValidDate(request.getStartDate(), request.getEndDate())) {
 			validateDateRange(
 				Objects.requireNonNull(request.getStartDate()),
