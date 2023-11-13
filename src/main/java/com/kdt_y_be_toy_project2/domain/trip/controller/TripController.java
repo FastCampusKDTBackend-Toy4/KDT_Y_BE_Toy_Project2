@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kdt_y_be_toy_project2.domain.member.domain.Member;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.service.TripService;
@@ -98,5 +99,22 @@ public class TripController {
 		return ResponseEntity.status(HttpStatus.OK)
 			.contentType(MediaType.APPLICATION_JSON)
 			.body(tripService.editTrip(tripId, request));
+	}
+
+	@GetMapping("/members/trips/likes")
+	public ResponseEntity<List<TripResponse>> getMemberLikedTrip() {
+		Member member = Member.builder().build();
+		return ResponseEntity.status(HttpStatus.OK)
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(tripService.getMemberLikedTrip(member.getEmail()));
+	}
+
+	@PostMapping("/{trip_id}/likes")
+	public ResponseEntity<Void> addLikeTrip(
+		@PathVariable(name = "trip_id") final Long tripId
+	) {
+		Member member = Member.builder().build();
+		tripService.addLikeTrip(tripId, member.getEmail());
+		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 }
