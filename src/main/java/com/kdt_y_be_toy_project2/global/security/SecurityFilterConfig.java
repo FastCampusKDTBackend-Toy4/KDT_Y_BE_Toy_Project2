@@ -1,5 +1,6 @@
 package com.kdt_y_be_toy_project2.global.security;
 
+import com.kdt_y_be_toy_project2.global.security.formlogin.CustomFormLoginFilter;
 import com.kdt_y_be_toy_project2.global.security.jwt.JwtAuthenticationFilter;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -14,28 +15,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityFilterConfig {
 
+    private final CustomFormLoginFilter customFormLoginFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-
     public SecurityFilterConfig(
+        CustomFormLoginFilter customFormLoginFilter,
         JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.customFormLoginFilter = customFormLoginFilter;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
     SecurityFilterChain http(HttpSecurity http) throws Exception {
         http
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(sessionConfig ->
                 sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.authorizeHttpRequests(request ->
-            request.requestMatchers("/v1/members/signUp", "/v1/members/login").permitAll()
+            request.requestMatchers("/v1/members/signUp", "/login").permitAll()
                 .anyRequest().authenticated());
 
-        http.formLogin(AbstractHttpConfigurer::disable);
-
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(customFormLoginFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }
