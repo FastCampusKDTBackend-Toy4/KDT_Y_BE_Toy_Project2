@@ -3,12 +3,17 @@ package com.kdt_y_be_toy_project2.domain.trip.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +34,8 @@ import com.kdt_y_be_toy_project2.global.util.DateTimeUtil;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class TripControllerTest {
+
+	private final static String BASE_URL = "/v1/trips";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -64,7 +71,7 @@ class TripControllerTest {
 			tripRepository.saveAll(TripTestFactory.createTestTripList(5));
 
 			// when
-			ResultActions getAllTripsAction = mockMvc.perform(get("/v1/trips"));
+			ResultActions getAllTripsAction = mockMvc.perform(get(BASE_URL));
 
 			// then
 			getAllTripsAction
@@ -80,7 +87,7 @@ class TripControllerTest {
 			long tripId = expectedTrip.getId();
 
 			// when
-			ResultActions getTripAction = mockMvc.perform(get("/v1/trips/" + tripId));
+			ResultActions getTripAction = mockMvc.perform(get(BASE_URL + "/" + tripId));
 
 			// then
 			getTripAction.andExpect(status().isOk());
@@ -94,7 +101,7 @@ class TripControllerTest {
 			long tripId = 12345L;
 
 			// when
-			ResultActions getTripAction = mockMvc.perform(get("/v1/trips/" + tripId));
+			ResultActions getTripAction = mockMvc.perform(get(BASE_URL + "/" + tripId));
 
 			// then
 			getTripAction
@@ -122,7 +129,7 @@ class TripControllerTest {
 				.build();
 
 			// when
-			ResultActions createTripAction = mockMvc.perform(post("/v1/trips")
+			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -145,7 +152,7 @@ class TripControllerTest {
 				.build();
 
 			// when
-			ResultActions createTripAction = mockMvc.perform(post("/v1/trips")
+			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -171,7 +178,7 @@ class TripControllerTest {
 				.build();
 
 			// when
-			ResultActions createTripAction = mockMvc.perform(post("/v1/trips")
+			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -195,7 +202,7 @@ class TripControllerTest {
 				.build();
 
 			// when
-			ResultActions createTripAction = mockMvc.perform(post("/v1/trips")
+			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -236,7 +243,7 @@ class TripControllerTest {
 				.build();
 
 			// when
-			ResultActions editTripAction = mockMvc.perform(put("/v1/trips/" + savedTripId)
+			ResultActions editTripAction = mockMvc.perform(put(BASE_URL + "/" + savedTripId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -262,7 +269,7 @@ class TripControllerTest {
 				.build();
 
 			// when
-			ResultActions editTripAction = mockMvc.perform(put("/v1/trips/" + savedTripId)
+			ResultActions editTripAction = mockMvc.perform(put(BASE_URL + "/" + savedTripId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -270,6 +277,52 @@ class TripControllerTest {
 			editTripAction
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("message").value("날짜 범위가 잘못 선택되었습니다."));
+		}
+	}
+
+	@DisplayName("여행 정보를 검색할 때")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+	@Nested
+	class SearchTripTest {
+
+		private List<Trip> savedTripList;
+
+		@BeforeAll
+		void beforeAll() {
+			// given
+			savedTripList = tripRepository.saveAll(TripTestFactory.createTestTripList(5));
+		}
+
+		@DisplayName("1개 이상의 항목을 포함한 쿼리로 검색할 수 있다.")
+		@ValueSource(ints = {0, 1, 2, 3, 4})
+		@ParameterizedTest
+		void shouldSuccessToSearchTripWithQueries(int tripIndex) throws Exception {
+			// given
+			Trip expectedTrip = savedTripList.get(tripIndex);
+			StringBuilder searchQueryURL = new StringBuilder(BASE_URL + "/" + "search?");
+			if (tripIndex <= 1) {
+				searchQueryURL.append("name=").append(expectedTrip.getName());
+			}
+			if (tripIndex >= 1 && tripIndex <= 2) {
+				searchQueryURL.append("&tripType=").append(expectedTrip.getTripType().getValue());
+			}
+			if (tripIndex >= 2 && tripIndex <= 3) {
+				searchQueryURL.append("&startDate=").append(
+					expectedTrip.getTripSchedule().getStartDate().format(DateTimeFormatter.ISO_DATE));
+			}
+			if (tripIndex >= 3) {
+				searchQueryURL.append("&endDate=").append(
+					expectedTrip.getTripSchedule().getEndDate().format(DateTimeFormatter.ISO_DATE));
+			}
+			System.out.println(searchQueryURL);
+
+			// when
+			ResultActions searchTripsAction = mockMvc.perform(get(searchQueryURL.toString()));
+
+			// then
+			searchTripsAction
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$").isNotEmpty());
 		}
 	}
 }
