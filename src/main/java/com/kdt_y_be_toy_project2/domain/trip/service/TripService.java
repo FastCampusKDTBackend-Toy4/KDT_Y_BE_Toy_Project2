@@ -6,10 +6,13 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
+import com.kdt_y_be_toy_project2.domain.trip.domain.Likes;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripNotFoundException;
+import com.kdt_y_be_toy_project2.domain.trip.repository.LikesRepository;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 public class TripService {
 
 	private final TripRepository tripRepository;
+	private final MemberRepository memberRepository;
+	private final LikesRepository likesRepository;
 
 	@Transactional(readOnly = true)
 	public List<TripResponse> getAllTrips() {
@@ -53,7 +58,17 @@ public class TripService {
 
 		return TripResponse.from(updatedTrip);
 	}
+
+	public List<TripResponse> getMemberLikedTrip(String memberEmail) {
+		return likesRepository.getAllTripByMemberEmail(memberEmail)
+			.stream().map(TripResponse::from).toList();
+	}
+
+	public void addLikeTrip(Long tripId, String memberEmail) {
+		Likes newLikes = Likes.builder()
+			.trip(tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new))
+			.member(memberRepository.findById(memberEmail).orElseThrow(NullPointerException::new))
+			.build();
+		likesRepository.save(newLikes);
+	}
 }
-
-
-
