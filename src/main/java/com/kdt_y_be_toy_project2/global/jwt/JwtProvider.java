@@ -26,6 +26,9 @@ public class JwtProvider {
     @Value("${service.jwt.access-expiration}")
     private Long accessExpiration;
 
+    @Value("${service.jwt.refresh-expiration}")
+    private Long refreshExpiration;
+
     private final SecretKey secretKey;
 
     public JwtProvider(@Value("${service.jwt.secret-key}") String rawSecretKey) {
@@ -34,6 +37,10 @@ public class JwtProvider {
 
     public String createAccessToken(JwtPayload jwtPayload) {
         return createToken(jwtPayload, accessExpiration);
+    }
+
+    public String createRefreshToken(JwtPayload jwtPayload) {
+        return createToken(jwtPayload, refreshExpiration);
     }
 
     private String createToken(JwtPayload jwtPayload, long expiration) {
