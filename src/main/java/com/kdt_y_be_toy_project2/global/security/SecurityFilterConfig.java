@@ -1,7 +1,6 @@
 package com.kdt_y_be_toy_project2.global.security;
 
 import com.kdt_y_be_toy_project2.global.security.jwt.JwtAuthenticationFilter;
-import com.kdt_y_be_toy_project2.global.security.login.CustomUsernamePasswordAuthenticationSuccessHandler;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,14 +14,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityFilterConfig {
 
-    private final CustomUsernamePasswordAuthenticationSuccessHandler customUsernamePasswordAuthenticationSuccessHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 
     public SecurityFilterConfig(
-        CustomUsernamePasswordAuthenticationSuccessHandler customUsernamePasswordAuthenticationSuccessHandler,
         JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.customUsernamePasswordAuthenticationSuccessHandler = customUsernamePasswordAuthenticationSuccessHandler;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -34,11 +30,10 @@ public class SecurityFilterConfig {
                 sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.authorizeHttpRequests(request ->
-            request.requestMatchers("/v1/members/signUp", "/login").permitAll()
+            request.requestMatchers("/v1/members/signUp", "/v1/members/login").permitAll()
                 .anyRequest().authenticated());
 
-        http.formLogin(formLogin ->
-            formLogin.successHandler(customUsernamePasswordAuthenticationSuccessHandler));
+        http.formLogin(AbstractHttpConfigurer::disable);
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
