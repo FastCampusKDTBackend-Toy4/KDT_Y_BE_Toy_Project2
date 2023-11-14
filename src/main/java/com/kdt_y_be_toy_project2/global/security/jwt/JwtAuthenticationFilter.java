@@ -6,17 +6,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtAuthenticationProvider jwtAuthenticationProvider;
+    private final AuthenticationManager authenticationManager;
 
-    public JwtAuthenticationFilter(JwtAuthenticationProvider jwtAuthenticationProvider) {
-        this.jwtAuthenticationProvider = jwtAuthenticationProvider;
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
@@ -31,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String refreshToken = request.getHeader(CustomHttpHeaders.REFRESH_TOKEN);
 
         SecurityContextHolder.getContext()
-            .setAuthentication(jwtAuthenticationProvider.authenticate(
+            .setAuthentication(authenticationManager.authenticate(
                 JwtAuthenticationToken.unAuthorizeToken(accessToken, refreshToken)));
 
         chain.doFilter(request, response);
