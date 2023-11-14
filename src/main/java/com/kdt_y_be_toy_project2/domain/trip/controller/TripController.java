@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kdt_y_be_toy_project2.domain.member.domain.Member;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.service.TripService;
@@ -101,20 +101,24 @@ public class TripController {
 			.body(tripService.editTrip(tripId, request));
 	}
 
-	@GetMapping("/members/trips/likes")
-	public ResponseEntity<List<TripResponse>> getMemberLikedTrip() {
-		Member member = Member.builder().build();
+	@GetMapping("/my/likes")
+	public ResponseEntity<List<TripResponse>> getMemberLikedTrip(
+		Authentication authentication
+	) {
+		String memberEmail = (String)authentication.getPrincipal();
 		return ResponseEntity.status(HttpStatus.OK)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(tripService.getMemberLikedTrip(member.getEmail()));
+			.body(tripService.getMemberLikedTrip(memberEmail));
 	}
 
 	@PostMapping("/{trip_id}/likes")
 	public ResponseEntity<Void> addLikeTrip(
-		@PathVariable(name = "trip_id") final Long tripId
+		@PathVariable(name = "trip_id") final Long tripId,
+		Authentication authentication
 	) {
-		Member member = Member.builder().build();
-		tripService.addLikeTrip(tripId, member.getEmail());
+		String memberEmail = (String)authentication.getPrincipal();
+		tripService.addLikeTrip(tripId, memberEmail);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
+
 }
