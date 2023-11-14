@@ -1,7 +1,6 @@
 package com.kdt_y_be_toy_project2.domain.trip.domain.id;
 
-import java.io.Serializable;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,14 +12,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode
 @Getter
-public class LikesID implements Serializable {
+public class LikesID {
 
-	private Long trip;
-	private String member;
+	@Column(name = "trip_id")
+	private Long tripId;
+
+	@Column(name = "member_email")
+	private String memberEmail;
 
 	@Builder
-	private LikesID(Long trip, String member) {
-		this.trip = trip;
-		this.member = member;
+	private LikesID(Long tripId, String memberEmail) {
+		this.tripId = tripId;
+		this.memberEmail = memberEmail;
 	}
 }
