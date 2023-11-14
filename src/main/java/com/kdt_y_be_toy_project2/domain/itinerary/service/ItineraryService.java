@@ -10,6 +10,8 @@ import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundExceptio
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
+import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
+import com.kdt_y_be_toy_project2.global.resolver.SecurityContext;
 import com.kdt_y_be_toy_project2.global.util.LocalDateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -48,7 +50,7 @@ public class ItineraryService {
                 .orElseThrow();
     }
 
-    public ItineraryResponse createItinerary(final Long tripId, final ItineraryRequest request) {
+    public ItineraryResponse createItinerary(final LoginInfo loginInfo, final Long tripId, final ItineraryRequest request) {
 
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
         checkItineraryDuration(retrivedTrip, request);
@@ -59,7 +61,7 @@ public class ItineraryService {
         return Optional.of(ItineraryResponse.from(savedItinerary)).orElseThrow();
     }
 
-    public ItineraryResponse editItinerary(final Long tripId, final Long itineraryId, final ItineraryRequest request) {
+    public ItineraryResponse editItinerary(final LoginInfo loginInfo, final Long tripId, final Long itineraryId, final ItineraryRequest request) {
 
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
 
