@@ -15,5 +15,6 @@ spring:
     hibernate:
       ddl-auto: validate
 
-api:
-  key: ${KAKAO_KEY}
+kakao:
+  rest:
+    api-key: ${KAKAO_API_KEY}

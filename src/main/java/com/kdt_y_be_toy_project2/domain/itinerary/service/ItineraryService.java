@@ -124,33 +124,41 @@ public class ItineraryService {
         StayInfoRequest stayInfoRequest = request.stayInfoRequest();
 
         return Itinerary.builder()
-                .stayInfo(StayInfo.builder()
-                        .staySchedule(DateTimeScheduleInfo.builder().startDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.startDateTime()))
-                                .endDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.endDateTime())).build())
-                        .stayPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(request.stayInfoRequest().stayPlaceName()))
-                        .build())
-
-                .moveInfo(MoveInfo.builder()
-                        .moveSchedule(DateTimeScheduleInfo.builder()
-                                .startDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.startDateTime()))
-                                .endDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.endDateTime()))
-                                .build())
-
-                        .sourcePlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.sourcePlaceName()))
-                        .destPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.destPlaceName()))
-                        .transportationType(TransportationType.getByValue(moveInfoRequest.transportationType()))
-                        .build())
-
-                .accommodationInfo(AccommodationInfo.builder()
-                        .accommodationSchedule(DateTimeScheduleInfo.builder()
-                                .startDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.startDateTime()))
-                                .endDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.endDateTime()))
-                                .build())
-                        .accommodationPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(accommodationInfoRequest.accommodationPlaceName()))
-                        .build())
-
+                .stayInfo(buildStayInfo(stayInfoRequest, roadAddressInfoAPI))
+                .moveInfo(buildMoveInfo(moveInfoRequest, roadAddressInfoAPI))
+                .accommodationInfo(buildAccommodationInfo(accommodationInfoRequest, roadAddressInfoAPI))
                 .trip(trip)
                 .build();
-
     }
+
+    MoveInfo buildMoveInfo(MoveInfoRequest moveInfoRequest, RoadAddressInfoAPI roadAddressInfoAPI) {
+        return MoveInfo.builder()
+                .moveSchedule(DateTimeScheduleInfo.builder()
+                        .startDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.startDateTime()))
+                        .endDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.endDateTime()))
+                        .build())
+                .sourcePlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.sourcePlaceName()))
+                .destPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.destPlaceName()))
+                .transportationType(TransportationType.getByValue(moveInfoRequest.transportationType()))
+                .build();
+    }
+
+    StayInfo buildStayInfo(StayInfoRequest stayInfoRequest, RoadAddressInfoAPI roadAddressInfoAPI) {
+        return StayInfo.builder()
+                .staySchedule(DateTimeScheduleInfo.builder().startDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.startDateTime()))
+                        .endDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.endDateTime())).build())
+                .stayPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(stayInfoRequest.stayPlaceName()))
+                .build();
+    }
+
+    AccommodationInfo buildAccommodationInfo(AccommodationInfoRequest accommodationInfoRequest, RoadAddressInfoAPI roadAddressInfoAPI) {
+        return AccommodationInfo.builder()
+                .accommodationSchedule(DateTimeScheduleInfo.builder()
+                        .startDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.startDateTime()))
+                        .endDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.endDateTime()))
+                        .build())
+                .accommodationPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(accommodationInfoRequest.accommodationPlaceName()))
+                .build();
+    }
+
 }
