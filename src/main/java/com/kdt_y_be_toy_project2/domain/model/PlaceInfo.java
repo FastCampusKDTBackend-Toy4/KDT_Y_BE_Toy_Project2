@@ -9,15 +9,15 @@ import lombok.*;
 public class PlaceInfo {
 
     private String name;
-    private String road_address_name;
+    private String roadAddressName;
     private String x;
     private String y;
 
 
     @Builder
-    public PlaceInfo(String name, String road_address_name, String x, String y) {
+    public PlaceInfo(String name, String roadAddressName, String x, String y) {
         this.name = name;
-        this.road_address_name = road_address_name;
+        this.roadAddressName = roadAddressName;
         this.x = x;
         this.y = y;
     }

@@ -22,7 +22,7 @@ public class AccommodationInfo {
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "name", column = @Column(name = "accommodation_place_name")),
-            @AttributeOverride(name = "road_address_name", column = @Column(name = "accommodation_road_address_name")),
+            @AttributeOverride(name = "roadAddressName", column = @Column(name = "accommodation_road_address_name")),
             @AttributeOverride(name = "x", column = @Column(name = "accommodation_x")),
             @AttributeOverride(name = "y", column = @Column(name = "accommodation_y")),
     })
