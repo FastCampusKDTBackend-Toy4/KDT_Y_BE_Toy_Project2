@@ -1,13 +1,18 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.service;
 
-import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
+import com.kdt_y_be_toy_project2.domain.itinerary.api.RoadAddressInfoAPI;
+import com.kdt_y_be_toy_project2.domain.itinerary.domain.*;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.AccommodationInfoRequest;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.MoveInfoRequest;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.StayInfoRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidDateException;
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidItineraryDurationException;
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.ItineraryNotFoundException;
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundException;
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
+import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
 import com.kdt_y_be_toy_project2.global.util.LocalDateTimeUtil;
@@ -26,6 +31,7 @@ public class ItineraryService {
 
     private final ItineraryRepository itineraryRepository;
     private final TripRepository tripRepository;
+    private final RoadAddressInfoAPI roadAddressInfoAPI;
 
     @Transactional(readOnly = true)
     public List<ItineraryResponse> getAllItineraries(final Long tripId) {
@@ -60,7 +66,10 @@ public class ItineraryService {
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
         checkItineraryDuration(retrivedTrip, request);
         checkInvalidDate(request);
-        Itinerary savedItinerary = Optional.of(itineraryRepository.save(ItineraryRequest.toEntity(request, retrivedTrip))).orElseThrow();
+
+        Itinerary itinerary = updateItineraryWithRoadAddresses(request, retrivedTrip);
+
+        Itinerary savedItinerary = Optional.of(itineraryRepository.save(itinerary)).orElseThrow();
         retrivedTrip.getItineraries().add(savedItinerary);
 
         return Optional.of(ItineraryResponse.from(savedItinerary)).orElseThrow();
@@ -70,9 +79,11 @@ public class ItineraryService {
 
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
 
+        Itinerary updateItinerary = updateItineraryWithRoadAddresses(request, retrivedTrip);
+
         for (Itinerary itinerary : retrivedTrip.getItineraries()) {
             if (itinerary.getId().equals(itineraryId)) {
-                itinerary.update(ItineraryRequest.toEntity(request, retrivedTrip));
+                itinerary.update(updateItinerary);
                 checkItineraryDuration(itinerary.getTrip(), request);
                 checkInvalidDate(request);
 
@@ -104,5 +115,42 @@ public class ItineraryService {
                 LocalDateTimeUtil.toLocalDateTime(itinerary.accommodationInfoRequest().startDateTime()).isAfter(LocalDateTimeUtil.toLocalDateTime(itinerary.accommodationInfoRequest().endDateTime())) ||
                 LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().startDateTime()).isAfter(LocalDateTimeUtil.toLocalDateTime(itinerary.stayInfoRequest().endDateTime()))
         ) throw new InvalidDateException();
+    }
+
+    Itinerary updateItineraryWithRoadAddresses(ItineraryRequest request, Trip trip) {
+
+        MoveInfoRequest moveInfoRequest = request.moveInfoRequest();
+        AccommodationInfoRequest accommodationInfoRequest = request.accommodationInfoRequest();
+        StayInfoRequest stayInfoRequest = request.stayInfoRequest();
+
+        return Itinerary.builder()
+                .stayInfo(StayInfo.builder()
+                        .staySchedule(DateTimeScheduleInfo.builder().startDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.startDateTime()))
+                                .endDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.endDateTime())).build())
+                        .stayPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(request.stayInfoRequest().stayPlaceName()))
+                        .build())
+
+                .moveInfo(MoveInfo.builder()
+                        .moveSchedule(DateTimeScheduleInfo.builder()
+                                .startDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.startDateTime()))
+                                .endDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.endDateTime()))
+                                .build())
+
+                        .sourcePlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.sourcePlaceName()))
+                        .destPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.destPlaceName()))
+                        .transportationType(TransportationType.getByValue(moveInfoRequest.transportationType()))
+                        .build())
+
+                .accommodationInfo(AccommodationInfo.builder()
+                        .accommodationSchedule(DateTimeScheduleInfo.builder()
+                                .startDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.startDateTime()))
+                                .endDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.endDateTime()))
+                                .build())
+                        .accommodationPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(accommodationInfoRequest.accommodationPlaceName()))
+                        .build())
+
+                .trip(trip)
+                .build();
+
     }
 }
