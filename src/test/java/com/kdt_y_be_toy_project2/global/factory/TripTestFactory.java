@@ -12,8 +12,10 @@ public class TripTestFactory {
 	public static Trip createTestTrip() {
 		int randomTripTypeIndex = ThreadLocalRandom.current().nextInt(TripType.values().length);
 		TripType randomTripType = TripType.values()[randomTripTypeIndex];
+
 		return Trip.builder()
 			.name("여행테스트" + ThreadLocalRandom.current().nextInt(1000))
+			.member(MemberTestFactory.createTestMemberWithRandomPassword())
 			.tripSchedule(DateScheduleInfoTestFactory.createRandom())
 			.tripType(randomTripType)
 			.build();

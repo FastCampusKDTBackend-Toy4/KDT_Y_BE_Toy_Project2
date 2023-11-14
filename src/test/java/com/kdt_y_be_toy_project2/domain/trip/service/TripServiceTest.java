@@ -16,6 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.kdt_y_be_toy_project2.domain.member.domain.Member;
+import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
 import com.kdt_y_be_toy_project2.domain.model.DateScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.domain.type.TripType;
@@ -24,9 +26,13 @@ import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripNotFoundException;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
 import com.kdt_y_be_toy_project2.global.error.ErrorCode;
+import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
 
 @ExtendWith(MockitoExtension.class)
 class TripServiceTest {
+
+	@Mock
+	private MemberRepository memberRepository;
 
 	@Mock
 	private TripRepository tripRepository;
@@ -34,11 +40,17 @@ class TripServiceTest {
 	@InjectMocks
 	private TripService tripService;
 
+	private Member member;
 	private Trip trip, trip2;
 	private TripRequest createRequest, editRequest;
 
 	@BeforeEach
 	public void init() {
+		member = Member.builder()
+			.name("testname")
+			.email("test@test.com")
+			.password("testpass")
+			.build();
 		trip = Trip.builder()
 			.id(1L)
 			.name("Test Trip")
@@ -119,9 +131,11 @@ class TripServiceTest {
 	void createTrip() {
 		// given
 		given(tripRepository.save(any(Trip.class))).willReturn(trip);
+		given(memberRepository.findById(anyString())).willReturn(Optional.ofNullable(member));
+		LoginInfo loginInfo = new LoginInfo(member.getEmail());
 
 		// when
-		TripResponse tripResponse = tripService.createTrip(createRequest);
+		TripResponse tripResponse = tripService.createTrip(createRequest, loginInfo);
 
 		// then
 		assertThat(tripResponse.tripName()).isEqualTo("Test Trip");
@@ -134,9 +148,11 @@ class TripServiceTest {
 	void editTrip() {
 		// given
 		given(tripRepository.findById(anyLong())).willReturn(Optional.ofNullable(trip));
+		given(memberRepository.findById(anyString())).willReturn(Optional.ofNullable(member));
+		LoginInfo loginInfo = new LoginInfo(member.getEmail());
 
 		// when
-		TripResponse tripResponse = tripService.editTrip(anyLong(), editRequest);
+		TripResponse tripResponse = tripService.editTrip(anyLong(), editRequest, loginInfo);
 
 		// then
 		assertThat(tripResponse.tripName()).isEqualTo("Test Trip3");
