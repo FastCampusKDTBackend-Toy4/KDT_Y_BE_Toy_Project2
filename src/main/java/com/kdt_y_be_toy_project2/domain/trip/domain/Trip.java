@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
+import com.kdt_y_be_toy_project2.domain.member.domain.Member;
 import com.kdt_y_be_toy_project2.domain.model.DateScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.type.TripType;
 import com.kdt_y_be_toy_project2.domain.trip.domain.type.TripTypeConverter;
@@ -15,9 +16,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -32,6 +36,10 @@ public class Trip {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_email", nullable = false)
+	private Member member;
 
 	@Column(nullable = false)
 	private String name;
@@ -54,8 +62,9 @@ public class Trip {
 	private DateScheduleInfo tripSchedule;
 
 	@Builder
-	private Trip(Long id, String name, TripType tripType, DateScheduleInfo tripSchedule) {
+	private Trip(Long id, Member member, String name, TripType tripType, DateScheduleInfo tripSchedule) {
 		this.id = id;
+		this.member = member;
 		this.name = name;
 		this.tripType = tripType;
 		this.tripSchedule = tripSchedule;
