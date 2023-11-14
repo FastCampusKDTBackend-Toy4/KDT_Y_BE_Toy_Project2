@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
+import com.kdt_y_be_toy_project2.domain.trip.dto.TripSearchRequest;
 import com.kdt_y_be_toy_project2.domain.trip.service.TripService;
 import com.kdt_y_be_toy_project2.global.error.ErrorResponse;
 
@@ -98,5 +99,14 @@ public class TripController {
 		return ResponseEntity.status(HttpStatus.OK)
 			.contentType(MediaType.APPLICATION_JSON)
 			.body(tripService.editTrip(tripId, request));
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<TripResponse>> searchTrips(
+		@Valid final TripSearchRequest request
+	) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(tripService.searchTrips(request));
 	}
 }
