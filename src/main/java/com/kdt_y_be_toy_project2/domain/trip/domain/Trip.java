@@ -41,6 +41,9 @@ public class Trip {
 	@OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Itinerary> itineraries;
 
+	@Column(nullable = false)
+	private Long likesCount;
+
 	@Embedded
 	@AttributeOverrides({
 		@AttributeOverride(name = "startDate", column = @Column(name = "start_date", nullable = false)),
@@ -55,6 +58,7 @@ public class Trip {
 		this.tripType = tripType;
 		this.tripSchedule = tripSchedule;
 		this.itineraries = new ArrayList<>();
+		this.likesCount = 0L;
 	}
 
 	public Trip update(Trip trip) {
@@ -62,5 +66,9 @@ public class Trip {
 		this.tripType = trip.tripType;
 		this.tripSchedule = trip.tripSchedule;
 		return this;
+	}
+
+	public void increaseCount() {
+		this.likesCount++;
 	}
 }

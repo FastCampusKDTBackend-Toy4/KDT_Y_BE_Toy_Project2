@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
@@ -24,10 +25,14 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kdt_y_be_toy_project2.domain.member.dto.request.SignUpRequest;
+import com.kdt_y_be_toy_project2.domain.member.service.MemberService;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
 import com.kdt_y_be_toy_project2.global.factory.TripTestFactory;
+import com.kdt_y_be_toy_project2.global.jwt.JwtPayload;
+import com.kdt_y_be_toy_project2.global.jwt.JwtProvider;
 import com.kdt_y_be_toy_project2.global.util.DateTimeUtil;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -45,6 +50,12 @@ class TripControllerTest {
 
 	@Autowired
 	private TripRepository tripRepository;
+
+	@Autowired
+	private MemberService memberService;
+
+	@Autowired
+	private JwtProvider jwtProvider;
 
 	private void assertTripResponse(Trip expectedTrip, ResultActions resultActions) throws Exception {
 		// then
@@ -323,6 +334,62 @@ class TripControllerTest {
 			searchTripsAction
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$").isNotEmpty());
+		}
+	}
+
+	@DisplayName("여행 정보 좋아요 관련 테스트")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+	@Nested
+	class TripLikesTest {
+
+		private Trip savedTrip;
+
+		private String accessToken;
+		private String refreshToken;
+
+		@BeforeAll
+		void beforeAll() {
+			// given
+			savedTrip = tripRepository.save(TripTestFactory.createTestTrip());
+			memberService.signUp(
+				new SignUpRequest("test@test.com", "test", "testname1")
+			);
+			accessToken = jwtProvider.createAccessToken(new JwtPayload("test@test.com", new Date()));
+			refreshToken = jwtProvider.createRefreshToken(new JwtPayload("test@test.com", new Date()));
+		}
+
+		@DisplayName("멤버는 자신이 좋아요를 눌렀던 여행 리스트를 볼 수 있다.")
+		@Test
+		void shouldSuccessToGetMyLikesTripList() throws Exception {
+			// given
+
+			// when
+			ResultActions getLikesTripAction = mockMvc.perform(get(BASE_URL + "/my/likes")
+				.header("Access_Token", accessToken)
+				.header("Refresh_Token", refreshToken)
+			);
+
+			// then
+			getLikesTripAction
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$").isArray());
+		}
+
+		@DisplayName("멤버는 여행에 좋아요를 누를 수 있다.")
+		@Test
+		void shouldSuccessToLikeTrip() throws Exception {
+			// given
+			long savedTripId = savedTrip.getId();
+
+			// when
+			ResultActions likesTripAction = mockMvc.perform(post(BASE_URL + "/" + savedTripId + "/likes")
+				.header("Access_Token", accessToken)
+				.header("Refresh_Token", refreshToken)
+			);
+
+			// then
+			likesTripAction
+				.andExpect(status().isOk());
 		}
 	}
 }
