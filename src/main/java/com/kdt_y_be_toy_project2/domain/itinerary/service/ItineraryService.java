@@ -49,16 +49,9 @@ public class ItineraryService {
     public ItineraryResponse getItineraryById(final Long tripId, final Long itineraryId) {
 
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
-
-        for (Itinerary itinerary : retrivedTrip.getItineraries()) {
-            if (itinerary.getId().equals(itineraryId)) {
-                return Optional.of(itinerary)
-                        .map(ItineraryResponse::from)
-                        .orElseThrow();
-            }
-        }
-
-        throw new ItineraryNotFoundException();
+        return findItineraryInTrip(retrivedTrip, itineraryId)
+                .map(ItineraryResponse::from)
+                .orElseThrow();
     }
 
     public ItineraryResponse createItinerary(final Long tripId, final ItineraryRequest request) {
@@ -79,21 +72,15 @@ public class ItineraryService {
 
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
 
+        Itinerary retrivedItinerary = findItineraryInTrip(retrivedTrip,itineraryId).orElseThrow();
         Itinerary updateItinerary = updateItineraryWithRoadAddresses(request, retrivedTrip);
+        retrivedItinerary.update(updateItinerary);
+        checkItineraryDuration(retrivedItinerary.getTrip(), request);
+        checkInvalidDate(request);
 
-        for (Itinerary itinerary : retrivedTrip.getItineraries()) {
-            if (itinerary.getId().equals(itineraryId)) {
-                itinerary.update(updateItinerary);
-                checkItineraryDuration(itinerary.getTrip(), request);
-                checkInvalidDate(request);
-
-                return Optional.of(itineraryRepository.save(itinerary))
-                        .map(ItineraryResponse::from)
-                        .orElseThrow();
-            }
-        }
-
-        throw new ItineraryNotFoundException();
+        return Optional.of(itineraryRepository.save(retrivedItinerary))
+                .map(ItineraryResponse::from)
+                .orElseThrow();
     }
 
     void checkItineraryDuration(Trip trip, ItineraryRequest itinerary) {
@@ -124,41 +111,45 @@ public class ItineraryService {
         StayInfoRequest stayInfoRequest = request.stayInfoRequest();
 
         return Itinerary.builder()
-                .stayInfo(buildStayInfo(stayInfoRequest, roadAddressInfoAPI))
-                .moveInfo(buildMoveInfo(moveInfoRequest, roadAddressInfoAPI))
-                .accommodationInfo(buildAccommodationInfo(accommodationInfoRequest, roadAddressInfoAPI))
+                .stayInfo(StayInfo.builder()
+                        .staySchedule(DateTimeScheduleInfo.builder().startDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.startDateTime()))
+                                .endDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.endDateTime())).build())
+                        .stayPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(request.stayInfoRequest().stayPlaceName()))
+                        .build())
+
+                .moveInfo(MoveInfo.builder()
+                        .moveSchedule(DateTimeScheduleInfo.builder()
+                                .startDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.startDateTime()))
+                                .endDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.endDateTime()))
+                                .build())
+
+                        .sourcePlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.sourcePlaceName()))
+                        .destPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.destPlaceName()))
+                        .transportationType(TransportationType.getByValue(moveInfoRequest.transportationType()))
+                        .build())
+
+                .accommodationInfo(AccommodationInfo.builder()
+                        .accommodationSchedule(DateTimeScheduleInfo.builder()
+                                .startDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.startDateTime()))
+                                .endDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.endDateTime()))
+                                .build())
+                        .accommodationPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(accommodationInfoRequest.accommodationPlaceName()))
+                        .build())
+
                 .trip(trip)
                 .build();
-    }
 
-    MoveInfo buildMoveInfo(MoveInfoRequest moveInfoRequest, RoadAddressInfoAPI roadAddressInfoAPI) {
-        return MoveInfo.builder()
-                .moveSchedule(DateTimeScheduleInfo.builder()
-                        .startDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.startDateTime()))
-                        .endDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.endDateTime()))
-                        .build())
-                .sourcePlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.sourcePlaceName()))
-                .destPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.destPlaceName()))
-                .transportationType(TransportationType.getByValue(moveInfoRequest.transportationType()))
-                .build();
     }
+  
+    Optional<Itinerary> findItineraryInTrip (Trip trip, long itineraryId) {
 
-    StayInfo buildStayInfo(StayInfoRequest stayInfoRequest, RoadAddressInfoAPI roadAddressInfoAPI) {
-        return StayInfo.builder()
-                .staySchedule(DateTimeScheduleInfo.builder().startDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.startDateTime()))
-                        .endDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.endDateTime())).build())
-                .stayPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(stayInfoRequest.stayPlaceName()))
-                .build();
-    }
+        for (Itinerary itinerary : trip.getItineraries()) {
+            if (itinerary.getId().equals(itineraryId)) {
+                return Optional.of(itinerary);
+            }
+        }
 
-    AccommodationInfo buildAccommodationInfo(AccommodationInfoRequest accommodationInfoRequest, RoadAddressInfoAPI roadAddressInfoAPI) {
-        return AccommodationInfo.builder()
-                .accommodationSchedule(DateTimeScheduleInfo.builder()
-                        .startDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.startDateTime()))
-                        .endDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.endDateTime()))
-                        .build())
-                .accommodationPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(accommodationInfoRequest.accommodationPlaceName()))
-                .build();
+        throw new  ItineraryNotFoundException();
     }
 
 }
