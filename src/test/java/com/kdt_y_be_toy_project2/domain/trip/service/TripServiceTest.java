@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.kdt_y_be_toy_project2.domain.model.DateScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
-import com.kdt_y_be_toy_project2.domain.trip.domain.TripType;
+import com.kdt_y_be_toy_project2.domain.trip.domain.type.TripType;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripNotFoundException;

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
-import com.kdt_y_be_toy_project2.domain.trip.domain.TripType;
+import com.kdt_y_be_toy_project2.domain.trip.domain.type.TripType;
 
 public class TripTestFactory {
 
