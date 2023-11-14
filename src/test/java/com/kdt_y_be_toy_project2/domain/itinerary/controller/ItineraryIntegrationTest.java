@@ -9,16 +9,23 @@ import com.kdt_y_be_toy_project2.domain.itinerary.exception.ItineraryNotFoundExc
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundException;
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
 import com.kdt_y_be_toy_project2.domain.itinerary.service.ItineraryService;
+import com.kdt_y_be_toy_project2.domain.member.domain.Member;
+import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
 import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
+import com.kdt_y_be_toy_project2.global.config.CustomHttpHeaders;
 import com.kdt_y_be_toy_project2.global.factory.ItineraryTestFactory;
 import com.kdt_y_be_toy_project2.global.factory.TripTestFactory;
+import com.kdt_y_be_toy_project2.global.jwt.JwtPayload;
+import com.kdt_y_be_toy_project2.global.jwt.JwtProvider;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -27,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.LinkedHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,6 +49,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class ItineraryIntegrationTest {
+
+    //jwt
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtProvider jwtProvider;
 
     @Autowired
     private MockMvc mockMvc;
@@ -57,6 +76,10 @@ class ItineraryIntegrationTest {
     @Autowired
     private ItineraryRepository itineraryRepository;
 
+    private String accessToken;
+
+    private String refreshToken;
+
     private void assertItineraryResponse(Itinerary expectedItinerary, ResultActions resultActions) throws Exception {
         // then
         ItineraryResponse expecteditineraryResponse = ItineraryResponse.from(expectedItinerary);
@@ -72,6 +95,18 @@ class ItineraryIntegrationTest {
     }
 
 
+    void issueJWTToken() throws Exception {
+        Member testMember = Member.builder().email("test@naver.com").password(passwordEncoder.encode("1234")).name("test").build();
+        Member savedMember = memberRepository.save(testMember);
+
+        JwtPayload jwtPayload = new JwtPayload(savedMember.getEmail(), new Date());
+        accessToken = jwtProvider.createAccessToken(jwtPayload);
+        refreshToken = jwtProvider.createRefreshToken(jwtPayload);
+
+    }
+
+
+
     @DisplayName("여정 정보를 조회할 때")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     @Nested
@@ -81,8 +116,9 @@ class ItineraryIntegrationTest {
         private Itinerary itinerary;
 
         @BeforeAll
-        void beforeAll() {
+        void beforeAll() throws Exception {
             // given
+            issueJWTToken();
             Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
             itinerary = itineraryRepository.save(ItineraryTestFactory.createTestItinerary(trip));
             tripId = trip.getId();
@@ -92,8 +128,9 @@ class ItineraryIntegrationTest {
         @Test
         void shouldSuccessToGetAllItineraries() throws Exception {
             // when
-
-            ResultActions getAllItinerariesAction = mockMvc.perform(get("/v1/trips/" + tripId + "/itineraries"));
+            ResultActions getAllItinerariesAction = mockMvc.perform(get("/v1/trips/" + tripId + "/itineraries")
+                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
+                    .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
 
             // then
             getAllItinerariesAction
@@ -108,7 +145,9 @@ class ItineraryIntegrationTest {
 
             // when
             ResultActions getItineraryAction = mockMvc.perform(
-                    get("/v1/trips/" + tripId + "/itineraries/" + itinerary.getId()));
+                    get("/v1/trips/" + tripId + "/itineraries/" + itinerary.getId())
+                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
+                    .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
 
             // then
             assertItineraryResponse(itinerary, getItineraryAction);
@@ -124,6 +163,7 @@ class ItineraryIntegrationTest {
         @Test
         void shouldSuccessToCreateItinerary() throws Exception {
             // given
+            issueJWTToken();
             trip = tripRepository.save(TripTestFactory.createTestTrip());
 
             ItineraryRequest request = ItineraryTestFactory.buildItineraryRequest(DateTimeScheduleInfo.builder()
@@ -135,7 +175,9 @@ class ItineraryIntegrationTest {
             // when
             ResultActions createTripAction = mockMvc.perform(post("/v1/trips/" + trip.getId() + "/itineraries")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)));
+                    .content(objectMapper.writeValueAsString(request))
+                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
+                    .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
 
             // then
             assertItineraryResponse(expectedItinerary, createTripAction);
@@ -152,6 +194,7 @@ class ItineraryIntegrationTest {
         @Test
         void shouldSuccessToEditItinerary() throws Exception {
             // given
+            issueJWTToken();
             trip = tripRepository.save(TripTestFactory.createTestTrip());
             Itinerary savedItinerary = itineraryRepository.save(ItineraryTestFactory.createTestItinerary(trip));
             trip.getItineraries().add(savedItinerary);
@@ -169,7 +212,9 @@ class ItineraryIntegrationTest {
             ResultActions editItineraryAction = mockMvc.perform(
                     put("/v1/trips/" + tripId + "/itineraries/" + savedItineraryId)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)));
+                            .content(objectMapper.writeValueAsString(request))
+                            .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
+                            .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
 
             // then
             editItineraryAction
@@ -188,10 +233,13 @@ class ItineraryIntegrationTest {
         @Test
         void NotExistItinerary() throws Exception {
             // given
+            issueJWTToken();
             Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
 
             // when
-            ResultActions getAllItinerariesAction = mockMvc.perform(get("/v1/trips/" + trip.getId() + "/itineraries"));
+            ResultActions getAllItinerariesAction = mockMvc.perform(get("/v1/trips/" + trip.getId() + "/itineraries")
+                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
+                    .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
 
             // then
             getAllItinerariesAction
@@ -204,12 +252,15 @@ class ItineraryIntegrationTest {
         @Test
         void NotExistTrip() throws Exception {
             //given
+            issueJWTToken();
             Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
             Itinerary itinerary = itineraryRepository.save(ItineraryTestFactory.createTestItinerary(trip));
 
             // when
             ResultActions getAllItinerariesAction = mockMvc.perform(
-                    get("/v1/trips/" + trip.getId() + 1 + "/itineraries/" + itinerary.getId()));
+                    get("/v1/trips/" + trip.getId() + 1 + "/itineraries/" + itinerary.getId())
+                            .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
+                            .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
 
             // then
             getAllItinerariesAction

@@ -32,6 +32,7 @@ class ItineraryServiceTest {
 
     private ItineraryRequest itineraryRequest;
 
+
     @Test
     void checkInvalidDate() {
         //given
