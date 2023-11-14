@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
+import com.kdt_y_be_toy_project2.domain.trip.dto.TripSearchRequest;
 import com.kdt_y_be_toy_project2.domain.trip.service.TripService;
 import com.kdt_y_be_toy_project2.global.error.ErrorResponse;
+import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
+import com.kdt_y_be_toy_project2.global.resolver.SecurityContext;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -99,4 +102,32 @@ public class TripController {
 			.contentType(MediaType.APPLICATION_JSON)
 			.body(tripService.editTrip(tripId, request));
 	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<TripResponse>> searchTrips(
+		@Valid final TripSearchRequest request
+	) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(tripService.searchTrips(request));
+	}
+
+	@GetMapping("/my/likes")
+	public ResponseEntity<List<TripResponse>> getMemberLikedTrip(
+		@SecurityContext LoginInfo loginInfo
+	) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(tripService.getMemberLikedTrip(loginInfo.username()));
+	}
+
+	@PostMapping("/{trip_id}/likes")
+	public ResponseEntity<Void> addLikeTrip(
+		@PathVariable(name = "trip_id") final Long tripId,
+		@SecurityContext LoginInfo loginInfo
+	) {
+		tripService.addLikeTrip(tripId, loginInfo.username());
+		return ResponseEntity.status(HttpStatus.OK).build();
+	}
+
 }

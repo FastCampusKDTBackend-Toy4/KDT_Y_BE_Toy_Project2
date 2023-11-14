@@ -21,6 +21,8 @@ public record TripResponse(
 	String endDate,
 	@Schema(description = "여행 국내외여부")
 	String tripType,
+	@Schema(description = "여행 좋아요 개수")
+	Long likesCount,
 	@Schema(description = "여행에 포함된 여정 리스트")
 	List<ItineraryResponse> itineraries
 ) {
@@ -31,6 +33,7 @@ public record TripResponse(
 			.startDate(DateTimeUtil.toString(trip.getTripSchedule().getStartDate()))
 			.endDate(DateTimeUtil.toString(trip.getTripSchedule().getEndDate()))
 			.tripType(trip.getTripType().getValue())
+			.likesCount(trip.getLikesCount())
 			.itineraries(trip.getItineraries().stream().map(ItineraryResponse::from).toList())
 			.build();
 	}

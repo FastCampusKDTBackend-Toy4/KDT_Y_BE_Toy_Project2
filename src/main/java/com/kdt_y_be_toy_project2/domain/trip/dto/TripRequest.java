@@ -28,7 +28,7 @@ public record TripRequest(
 	String endDate,
 
 	@Schema(description = "국내외여부", defaultValue = "국내")
-	@NotNull(message = "국내외여부를 입력해야 합니다. (예: 국내)")
+	@NotBlank(message = "국내외여부를 입력해야 합니다. (예: 국내)")
 	String tripType
 ) {
 	public static Trip toEntity(final TripRequest request) {
