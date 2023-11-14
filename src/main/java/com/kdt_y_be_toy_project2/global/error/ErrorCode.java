@@ -12,6 +12,7 @@ public enum ErrorCode {
 
 	// 여행
 	TRIP_NOT_FOUND(HttpStatus.NOT_FOUND, "여행 정보를 찾을 수 없습니다."),
+	TRIP_ALREADY_LIKES(HttpStatus.BAD_REQUEST, "이미 좋아요를 누르셨습니다."),
 
 	// 여정
 	ITINERARY_NOT_FOUND(HttpStatus.NOT_FOUND, "여정 정보를 찾을 수 없습니다."),

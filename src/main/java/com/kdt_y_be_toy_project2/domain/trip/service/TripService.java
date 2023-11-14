@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Likes;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
+import com.kdt_y_be_toy_project2.domain.trip.domain.id.LikesID;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
+import com.kdt_y_be_toy_project2.domain.trip.exception.TripAlreadyLikesException;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripNotFoundException;
 import com.kdt_y_be_toy_project2.domain.trip.repository.LikesRepository;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
@@ -65,9 +67,20 @@ public class TripService {
 	}
 
 	public void addLikeTrip(Long tripId, String memberEmail) {
+		Trip trip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
+
+		LikesID newLikesID = LikesID.builder()
+			.tripId(tripId)
+			.memberEmail(memberEmail)
+			.build();
+
+		if (likesRepository.existsById(newLikesID)) {
+			throw new TripAlreadyLikesException();
+		}
+
 		Likes newLikes = Likes.builder()
-			.trip(tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new))
-			.member(memberRepository.findById(memberEmail).orElseThrow(NullPointerException::new))
+			.likesID(newLikesID)
+			.trip(trip)
 			.build();
 		likesRepository.save(newLikes);
 	}
