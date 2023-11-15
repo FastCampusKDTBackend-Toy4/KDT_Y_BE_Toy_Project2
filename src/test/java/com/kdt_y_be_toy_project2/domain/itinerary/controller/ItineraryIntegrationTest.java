@@ -22,6 +22,7 @@ import com.kdt_y_be_toy_project2.global.factory.MemberTestFactory;
 import com.kdt_y_be_toy_project2.global.factory.TripTestFactory;
 import com.kdt_y_be_toy_project2.global.jwt.JwtPayload;
 import com.kdt_y_be_toy_project2.global.jwt.JwtProvider;
+import com.kdt_y_be_toy_project2.global.jwt.service.JwtService;
 import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ItineraryIntegrationTest {
 
     @Autowired
-    private JwtProvider jwtProvider;
+    private JwtService jwtService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -78,8 +79,6 @@ class ItineraryIntegrationTest {
 
     private String accessToken;
 
-    private String refreshToken;
-
     private void assertItineraryResponse(Itinerary expectedItinerary, ResultActions resultActions) throws Exception {
         // then
         ItineraryResponse expecteditineraryResponse = ItineraryResponse.from(expectedItinerary);
@@ -99,8 +98,7 @@ class ItineraryIntegrationTest {
         Member savedMember = memberRepository.save(testMember);
 
         JwtPayload jwtPayload = new JwtPayload(savedMember.getEmail(), new Date());
-        accessToken = jwtProvider.createAccessToken(jwtPayload);
-        refreshToken = jwtProvider.createRefreshToken(jwtPayload);
+        accessToken = jwtService.createTokenPair(jwtPayload).accessToken();
 
     }
 
@@ -117,8 +115,9 @@ class ItineraryIntegrationTest {
         @BeforeAll
         void beforeAll() throws Exception {
             // given
-            Trip trip = TripTestFactory.createTestTrip();
-            issueJWTToken(trip.getMember());
+            Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+            Trip trip = TripTestFactory.createTestTrip(member);
+            issueJWTToken(member);
             trip = tripRepository.save(trip);
             itinerary = itineraryRepository.save(ItineraryTestFactory.createTestItinerary(trip));
             tripId = trip.getId();
@@ -129,8 +128,7 @@ class ItineraryIntegrationTest {
         void shouldSuccessToGetAllItineraries() throws Exception {
             // when
             ResultActions getAllItinerariesAction = mockMvc.perform(get("/v1/trips/" + tripId + "/itineraries")
-                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
-                    .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
+                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken));
 
             // then
             getAllItinerariesAction
@@ -146,8 +144,7 @@ class ItineraryIntegrationTest {
             // when
             ResultActions getItineraryAction = mockMvc.perform(
                     get("/v1/trips/" + tripId + "/itineraries/" + itinerary.getId())
-                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
-                    .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
+                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken));
 
             // then
             assertItineraryResponse(itinerary, getItineraryAction);
@@ -163,8 +160,9 @@ class ItineraryIntegrationTest {
         @Test
         void shouldSuccessToCreateItinerary() throws Exception {
             // given
-            Trip trip = TripTestFactory.createTestTrip();
-            issueJWTToken(trip.getMember());
+            Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+            Trip trip = TripTestFactory.createTestTrip(member);
+            issueJWTToken(member);
             trip = tripRepository.save(trip);
 
             ItineraryRequest request = ItineraryTestFactory.buildItineraryRequest(DateTimeScheduleInfo.builder()
@@ -177,8 +175,7 @@ class ItineraryIntegrationTest {
             ResultActions createTripAction = mockMvc.perform(post("/v1/trips/" + trip.getId() + "/itineraries")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
-                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
-                    .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
+                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken));
 
             // then
             assertItineraryResponse(expectedItinerary, createTripAction);
@@ -195,8 +192,9 @@ class ItineraryIntegrationTest {
         @Test
         void shouldSuccessToEditItinerary() throws Exception {
             // given
-            Trip trip = TripTestFactory.createTestTrip();
-            issueJWTToken(trip.getMember());
+            Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+            Trip trip = TripTestFactory.createTestTrip(member);
+            issueJWTToken(member);
             trip = tripRepository.save(trip);
 
             Itinerary savedItinerary = itineraryRepository.save(ItineraryTestFactory.createTestItinerary(trip));
@@ -216,8 +214,7 @@ class ItineraryIntegrationTest {
                     put("/v1/trips/" + tripId + "/itineraries/" + savedItineraryId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
-                            .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
-                            .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
+                            .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken));
 
             // then
             editItineraryAction
@@ -237,14 +234,14 @@ class ItineraryIntegrationTest {
         @Test
         void NotExistItinerary() throws Exception {
             // given
-            Trip trip = TripTestFactory.createTestTrip();
-            issueJWTToken(trip.getMember());
+            Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+            Trip trip = TripTestFactory.createTestTrip(member);
+            issueJWTToken(member);
             trip = tripRepository.save(trip);
 
             // when
             ResultActions getAllItinerariesAction = mockMvc.perform(get("/v1/trips/" + trip.getId() + "/itineraries")
-                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
-                    .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
+                    .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken));
 
             // then
             getAllItinerariesAction
@@ -257,8 +254,9 @@ class ItineraryIntegrationTest {
         @Test
         void NotExistTrip() throws Exception {
             //given
-            Trip trip = TripTestFactory.createTestTrip();
-            issueJWTToken(trip.getMember());
+            Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+            Trip trip = TripTestFactory.createTestTrip(member);
+            issueJWTToken(member);
             trip = tripRepository.save(trip);
 
             Itinerary itinerary = itineraryRepository.save(ItineraryTestFactory.createTestItinerary(trip));
@@ -266,8 +264,7 @@ class ItineraryIntegrationTest {
             // when
             ResultActions getAllItinerariesAction = mockMvc.perform(
                     get("/v1/trips/" + trip.getId() + 1 + "/itineraries/" + itinerary.getId())
-                            .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
-                            .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
+                            .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken));
 
             // then
             getAllItinerariesAction
@@ -279,10 +276,11 @@ class ItineraryIntegrationTest {
 
         @DisplayName("여정 기간이 여행 기간에 포함되지 않는 경우 에러를 발생한다.")
         @Test
-        void shouldNotContainsItineraryDuration() {
+        void shouldNotContainsItineraryDuration() throws Exception {
             //given
-            Trip trip = TripTestFactory.createTestTrip();
-            memberRepository.save(trip.getMember());
+            Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+            Trip trip = TripTestFactory.createTestTrip(member);
+            issueJWTToken(member);
             final Trip savedTrip = tripRepository.save(trip);
 
 
@@ -309,8 +307,9 @@ class ItineraryIntegrationTest {
         @Test
         void shouldNotAccessToUpdateItinearary() throws Exception {
             //given
-            Trip testTrip = TripTestFactory.createTestTrip();
-            memberRepository.save(testTrip.getMember());
+            Member member= MemberTestFactory.createTestMemberWithRandomPassword();
+            Trip testTrip = TripTestFactory.createTestTrip(member);
+            memberRepository.save(member);
             Trip savedtrip = tripRepository.save(testTrip);
             //여행을 저장한 멤버가 아닌, 새로운 멤버가 생성되고, JWT TOKEN을 발급받음.
             issueJWTToken(MemberTestFactory.createTestMemberWithRandomPassword());
@@ -327,8 +326,7 @@ class ItineraryIntegrationTest {
                     put("/v1/trips/" + savedtrip.getId() + "/itineraries/" + savedItinerary.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
-                            .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
-                            .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
+                            .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken));
 
             // then
             editItineraryAction

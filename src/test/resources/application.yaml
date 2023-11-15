@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: KDT-5
   jpa:
@@ -10,8 +12,14 @@ spring:
     username: sa
     driver-class-name: org.h2.Driver
 
+
+
 service:
   jwt:
     secret-key: kj23h523kj5h24o1209481230948fsdfkljut90dgd89f0s2kl3daisoudqiwouekjashdjkahjkaqwueyqouasioudklascxcvhjuopqfu9aduro3
     access-expiration: 360000
     refresh-expiration: 600000
+
+kakao:
+  rest:
+    api-key: ${KAKAO_API_KEY}
