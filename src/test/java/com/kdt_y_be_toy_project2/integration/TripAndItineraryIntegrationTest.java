@@ -26,10 +26,13 @@ import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.AccommodationInfoRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.MoveInfoRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.StayInfoRequest;
+import com.kdt_y_be_toy_project2.domain.member.domain.Member;
+import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
 import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
+import com.kdt_y_be_toy_project2.global.factory.MemberTestFactory;
 import com.kdt_y_be_toy_project2.global.factory.TripTestFactory;
 import com.kdt_y_be_toy_project2.global.util.DateTimeUtil;
 import com.kdt_y_be_toy_project2.global.util.LocalDateTimeUtil;
@@ -44,11 +47,15 @@ public class TripAndItineraryIntegrationTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Autowired
+	private MemberRepository memberRepository;
+
 	@DisplayName("사용자는 여행 정보를 만든 후에 여정 정보를 등록할 수 있다.")
 	@Test
 	public void createItineraryAfterCreatingTrip() throws Exception {
 		// given
-		Trip expectedTrip = TripTestFactory.createTestTrip();
+		Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+		Trip expectedTrip = TripTestFactory.createTestTrip(member);
 		String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
 		String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
 

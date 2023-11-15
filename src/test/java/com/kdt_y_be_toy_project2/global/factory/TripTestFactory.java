@@ -10,33 +10,22 @@ import com.kdt_y_be_toy_project2.domain.trip.domain.type.TripType;
 
 public class TripTestFactory {
 
-	public static Trip createTestTrip() {
-		int randomTripTypeIndex = ThreadLocalRandom.current().nextInt(TripType.values().length);
-		TripType randomTripType = TripType.values()[randomTripTypeIndex];
-
-		return Trip.builder()
-			.name("여행테스트" + ThreadLocalRandom.current().nextInt(1000))
-			.member(MemberTestFactory.createTestMemberWithRandomPassword())
-			.tripSchedule(DateScheduleInfoTestFactory.createRandom())
-			.tripType(randomTripType)
-			.build();
-	}
 	public static Trip createTestTrip(Member member) {
 		int randomTripTypeIndex = ThreadLocalRandom.current().nextInt(TripType.values().length);
 		TripType randomTripType = TripType.values()[randomTripTypeIndex];
 
 		return Trip.builder()
-				.name("여행테스트" + ThreadLocalRandom.current().nextInt(1000))
-				.member(member)
-				.tripSchedule(DateScheduleInfoTestFactory.createRandom())
-				.tripType(randomTripType)
-				.build();
+			.name("여행테스트" + ThreadLocalRandom.current().nextInt(1000))
+			.member(member)
+			.tripSchedule(DateScheduleInfoTestFactory.createRandom())
+			.tripType(randomTripType)
+			.build();
 	}
 
-	public static List<Trip> createTestTripList(int size) {
+	public static List<Trip> createTestTripList(int size, Member member) {
 		List<Trip> tripList = new ArrayList<>();
 		while (size-- > 0) {
-			tripList.add(createTestTrip());
+			tripList.add(createTestTrip(member));
 		}
 		return tripList;
 	}
