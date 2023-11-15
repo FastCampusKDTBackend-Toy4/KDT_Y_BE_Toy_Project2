@@ -35,7 +35,7 @@ public class SecurityFilterConfig {
                 sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.authorizeHttpRequests(request ->
-            request.requestMatchers("/v1/members/signUp", "/login").permitAll()
+            request.requestMatchers("/v1/members/signUp", "/login", "/v1/refresh").permitAll()
                 .anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
