@@ -49,7 +49,7 @@ class JwtProviderTest {
             JwtPayload targetPayload = new JwtPayload("test@email.com", issueDate);
 
             // when
-            String accessToken = jwtProvider.createAccessToken(targetPayload);
+            String accessToken = jwtProvider.createToken(targetPayload, accessExpiration);
 
             // then
             Assertions.assertThat(accessToken).isNotNull();
@@ -73,7 +73,7 @@ class JwtProviderTest {
             JwtPayload targetPayload = new JwtPayload(null, issueDate);
 
             // when then
-            Assertions.assertThatThrownBy(() -> jwtProvider.createAccessToken(targetPayload))
+            Assertions.assertThatThrownBy(() -> jwtProvider.createToken(targetPayload, accessExpiration))
                 .isInstanceOf(NullPointerException.class);
         }
 
@@ -85,7 +85,7 @@ class JwtProviderTest {
             JwtPayload targetPayload = new JwtPayload("test@email.com", null);
 
             // when then
-            Assertions.assertThatThrownBy(() -> jwtProvider.createAccessToken(targetPayload))
+            Assertions.assertThatThrownBy(() -> jwtProvider.createToken(targetPayload, accessExpiration))
                 .isInstanceOf(NullPointerException.class);
         }
     }
