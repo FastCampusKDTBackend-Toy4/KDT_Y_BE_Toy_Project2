@@ -22,10 +22,23 @@ public class TripTestFactory {
 			.build();
 	}
 
+	public static Trip createTestTripWithID(Member member, long id) {
+		int randomTripTypeIndex = ThreadLocalRandom.current().nextInt(TripType.values().length);
+		TripType randomTripType = TripType.values()[randomTripTypeIndex];
+
+		return Trip.builder()
+			.name("여행테스트" + ThreadLocalRandom.current().nextInt(1000))
+			.id(id)
+			.member(member)
+			.tripSchedule(DateScheduleInfoTestFactory.createRandom())
+			.tripType(randomTripType)
+			.build();
+	}
+
 	public static List<Trip> createTestTripList(int size, Member member) {
 		List<Trip> tripList = new ArrayList<>();
-		while (size-- > 0) {
-			tripList.add(createTestTrip(member));
+		for (int i = 1; i <= size; i++) {
+			tripList.add(createTestTripWithID(member, i));
 		}
 		return tripList;
 	}

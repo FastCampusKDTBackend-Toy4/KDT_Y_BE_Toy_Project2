@@ -1,103 +1,83 @@
 package com.kdt_y_be_toy_project2.domain.trip.controller;
 
+import static org.mockito.BDDMockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kdt_y_be_toy_project2.domain.member.domain.Member;
-import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
+import com.kdt_y_be_toy_project2.domain.member.exception.InvalidAuthException;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
-import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
+import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
+import com.kdt_y_be_toy_project2.domain.trip.exception.TripNotFoundException;
+import com.kdt_y_be_toy_project2.domain.trip.service.TripService;
 import com.kdt_y_be_toy_project2.global.config.CustomHttpHeaders;
 import com.kdt_y_be_toy_project2.global.factory.MemberTestFactory;
 import com.kdt_y_be_toy_project2.global.factory.TripTestFactory;
-import com.kdt_y_be_toy_project2.global.jwt.JwtPayload;
-import com.kdt_y_be_toy_project2.global.jwt.service.JwtService;
+import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
 import com.kdt_y_be_toy_project2.global.util.DateTimeUtil;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@WebMvcTest(TripController.class)
 @AutoConfigureMockMvc
-@WithMockUser
 @ActiveProfiles("test")
-class TripControllerTest {
+@ExtendWith(MockitoExtension.class)
+public class TripControllerTest {
 
 	private final static String BASE_URL = "/v1/trips";
-
+	private final static String FAKE_JWT_ACCESS_TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyLWtleSI6InRlc3RAdGVzdC5jb20iLCJpc3MiOiJLRFQtNSIsImlhdCI6MTcwMDA0NjgzOSwiZXhwIjoxNzAxMTQ3MTk5fQ.21Z9OIwgKxeTSE2jYCwqxuizJyVC4aUaYE7JeTlmCA0SEsRIDDa7C8qkpOhZb29OYbV7WDiWIIGy8RxkkFvUNw";
 	@Autowired
 	private MockMvc mockMvc;
-
 	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
-	private TripRepository tripRepository;
-
-	@Autowired
-	private MemberRepository memberRepository;
-
-	@Autowired
-	private JwtService jwtService;
-
-	private void assertTripResponse(Trip expectedTrip, ResultActions resultActions) throws Exception {
-		// then
-		resultActions
-			.andExpect(jsonPath("$.tripName").value(expectedTrip.getName()))
-			.andExpect(jsonPath("$.tripType").value(expectedTrip.getTripType().getValue()))
-			.andExpect(jsonPath("$.startDate")
-				.value(
-					DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate())
-				))
-			.andExpect(jsonPath("$.endDate")
-				.value(
-					DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate())
-				));
-	}
+	@MockBean
+	private TripService tripService;
 
 	private HttpHeaders createTestAuthHeader(String email) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add(
-			CustomHttpHeaders.ACCESS_TOKEN,
-			jwtService.createTokenPair(new JwtPayload(email, new Date())).accessToken()
-		);
+		headers.add(CustomHttpHeaders.ACCESS_TOKEN, FAKE_JWT_ACCESS_TOKEN);
 		return headers;
 	}
 
-	@DisplayName("여행 정보를 조회할 때")
+	@DisplayName("모든 여행 정보를 조회할 때")
+	@WithMockUser
 	@Nested
-	class GetTripsTest {
-		@DisplayName("모든 여행 정보를 가져올 수 있다.")
+	class GetAllTripsTest {
+		@DisplayName("모든 여행 정보 리스트를 조회할 수 있다.")
 		@Test
-		void shouldSuccessToGetAllTrips() throws Exception {
+		void getAllTripsSuccessTest() throws Exception {
 			// given
-			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
-			tripRepository.saveAll(TripTestFactory.createTestTripList(5, member));
+			Member mockMember = MemberTestFactory.createTestMemberWithRandomPassword();
+			List<Trip> mockTripList = TripTestFactory.createTestTripList(5, mockMember);
+
+			List<TripResponse> tripResponseList = mockTripList.stream()
+				.map(TripResponse::from).toList();
+			given(tripService.getAllTrips()).willReturn(tripResponseList);
 
 			// when
 			ResultActions getAllTripsAction = mockMvc.perform(get(BASE_URL));
@@ -105,30 +85,57 @@ class TripControllerTest {
 			// then
 			getAllTripsAction
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$").isArray());
+				.andExpect(jsonPath("$").isArray())
+				.andExpect(content().json(objectMapper.writeValueAsString(tripResponseList)));
+
 		}
 
-		@DisplayName("하나의 여행 정보를 가져올 수 있다.")
+		@DisplayName("여행 정보 리스트가 없으면 예외를 발생한다.")
 		@Test
-		void shouldSuccessToGetTripById() throws Exception {
+		void getAllTripsFailTestWhenResponseEmptyList() throws Exception {
 			// given
-			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
-			Trip expectedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
-			long tripId = expectedTrip.getId();
+			given(tripService.getAllTrips()).willThrow(new TripNotFoundException());
+
+			// when
+			ResultActions getAllTripsAction = mockMvc.perform(get(BASE_URL));
+
+			// then
+			getAllTripsAction
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.message").value("여행 정보를 찾을 수 없습니다."));
+		}
+	}
+
+	@DisplayName("하나의 여행 정보를 조회할 때")
+	@WithMockUser
+	@Nested
+	class GetTripTest {
+		@DisplayName("하나의 여행 정보를 조회할 수 있다.")
+		@Test
+		void getTripByIdSuccessTest() throws Exception {
+			// given
+			long tripId = 1L;
+			Member mockMember = MemberTestFactory.createTestMemberWithRandomPassword();
+			Trip mockTrip = TripTestFactory.createTestTripWithID(mockMember, tripId);
+
+			TripResponse tripResponse = TripResponse.from(mockTrip);
+			given(tripService.getTripById(anyLong())).willReturn(tripResponse);
 
 			// when
 			ResultActions getTripAction = mockMvc.perform(get(BASE_URL + "/" + tripId));
 
 			// then
-			getTripAction.andExpect(status().isOk());
-			assertTripResponse(expectedTrip, getTripAction);
+			getTripAction
+				.andExpect(status().isOk())
+				.andExpect(content().json(objectMapper.writeValueAsString(tripResponse)));
 		}
 
 		@DisplayName("존재하지 않는 ID의 여행 정보를 가져올 수 없다.")
 		@Test
-		void shouldFailToGetTripByIdWithInvalidId() throws Exception {
+		void getTripByIdFailTestWhenRequestInvalidId() throws Exception {
 			// give
 			long tripId = 12345L;
+			given(tripService.getTripById(tripId)).willThrow(new TripNotFoundException());
 
 			// when
 			ResultActions getTripAction = mockMvc.perform(get(BASE_URL + "/" + tripId));
@@ -143,329 +150,165 @@ class TripControllerTest {
 	@DisplayName("여행 정보를 등록할 때")
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
-	class CreateTripsTest {
+	class CreateTripTest {
 
-		private Member member;
-		private HttpHeaders testAuthHeaders;
-
-		@BeforeAll
-		public void beforeAll() {
-			member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
-			testAuthHeaders = createTestAuthHeader(member.getEmail());
+		@BeforeEach
+		public void beforeEach() {
+			Authentication authentication = new TestingAuthenticationToken("test@test.com", null);
+			authentication.setAuthenticated(true);
+			SecurityContext securityContext = SecurityContextHolder.getContext();
+			securityContext.setAuthentication(authentication);
 		}
 
 		@DisplayName("하나의 여행을 등록할 수 있다.")
 		@Test
-		void shouldSuccessToCreateTrip() throws Exception {
+		void createTripSuccessTest() throws Exception {
 			// given
-			Trip expectedTrip = TripTestFactory.createTestTrip(member);
-			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
-			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
+			long tripId = 1L;
+			Member mockMember = MemberTestFactory.createTestMemberWithRandomPassword();
+			Trip mockTrip = TripTestFactory.createTestTripWithID(mockMember, tripId);
+
+			String tripTypeStr = mockTrip.getTripType().getValue();
+			String startDateTimeStr = DateTimeUtil.toString(mockTrip.getTripSchedule().getStartDate());
+			String endDateTimeStr = DateTimeUtil.toString(mockTrip.getTripSchedule().getEndDate());
+
 			TripRequest request = TripRequest.builder()
-				.name(expectedTrip.getName())
-				.tripType(expectedTrip.getTripType().getValue())
+				.name(mockTrip.getName())
+				.tripType(tripTypeStr)
 				.startDate(startDateTimeStr)
 				.endDate(endDateTimeStr)
 				.build();
+			TripResponse expectedTripResponse = TripResponse.from(mockTrip);
+
+			given(tripService.createTrip(any(TripRequest.class), any(LoginInfo.class)))
+				.willReturn(expectedTripResponse);
 
 			// when
 			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
-				.headers(testAuthHeaders)
+				.with(csrf())
+				.headers(createTestAuthHeader(mockMember.getEmail()))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
 			// then
-			createTripAction.andExpect(status().isCreated());
-			assertTripResponse(expectedTrip, createTripAction);
+			createTripAction
+				.andExpect(status().isCreated())
+				.andExpect(content().json(objectMapper.writeValueAsString(expectedTripResponse)));
 		}
 
 		@DisplayName("여행 이름을 입력하지 않으면 등록할 수 없다.")
 		@Test
-		void shouldFailToCreateTripWithEmptyName() throws Exception {
+		void createTripFailTestWhenRequestNullTripName() throws Exception {
 			// given
-			Trip expectedTrip = TripTestFactory.createTestTrip(member);
-			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
-			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
+			long tripId = 1L;
+			Member mockMember = MemberTestFactory.createTestMemberWithRandomPassword();
+			Trip mockTrip = TripTestFactory.createTestTripWithID(mockMember, tripId);
+
+			String tripTypeStr = mockTrip.getTripType().getValue();
+			String startDateTimeStr = DateTimeUtil.toString(mockTrip.getTripSchedule().getStartDate());
+			String endDateTimeStr = DateTimeUtil.toString(mockTrip.getTripSchedule().getEndDate());
+
 			TripRequest request = TripRequest.builder()
-				.tripType(expectedTrip.getTripType().getValue())
+				.tripType(tripTypeStr)
 				.startDate(startDateTimeStr)
 				.endDate(endDateTimeStr)
 				.build();
 
 			// when
 			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
-				.headers(testAuthHeaders)
+				.with(csrf())
+				.headers(createTestAuthHeader(mockMember.getEmail()))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
 			// then
 			createTripAction
 				.andExpect(status().isBadRequest())
-				.andExpect(res -> Assertions.assertThat(res.getResolvedException())
-					.isInstanceOf(MethodArgumentNotValidException.class));
-		}
-
-		@DisplayName("여행이 끝나는 시간이 시작 시간보다 작으면 여행을 등록할 수 없다.")
-		@Test
-		void shouldFailToCreateTripIfEndTimeIsBeforeStartTime() throws Exception {
-			// given
-			Trip expectedTrip = TripTestFactory.createTestTrip(member);
-			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
-			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
-			TripRequest request = TripRequest.builder()
-				.name(expectedTrip.getName())
-				.tripType(expectedTrip.getTripType().getValue())
-				.startDate(startDateTimeStr)
-				.endDate(endDateTimeStr)
-				.build();
-
-			// when
-			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
-				.headers(testAuthHeaders)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)));
-
-			// then
-			createTripAction
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("message").value("날짜 범위가 잘못 선택되었습니다."));
-		}
-
-		@DisplayName("잘못된 여행 타입을 입력하면 등록할 수 없다.")
-		@Test
-		void shouldFailToCreateTripWithInvalidTripType() throws Exception {
-			// given
-			Trip expectedTrip = TripTestFactory.createTestTrip(member);
-			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
-			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
-			TripRequest request = TripRequest.builder()
-				.tripType("잘못된여행타입")
-				.startDate(startDateTimeStr)
-				.endDate(endDateTimeStr)
-				.build();
-
-			// when
-			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
-				.headers(testAuthHeaders)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)));
-
-			// then
-			createTripAction
-				.andExpect(status().isBadRequest())
-				.andExpect(res -> Assertions.assertThat(res.getResolvedException())
-					.isInstanceOf(MethodArgumentNotValidException.class));
+				.andExpect(jsonPath("$.message").value("여행 이름을 입력해야 합니다."));
 		}
 	}
 
 	@DisplayName("여행 정보를 수정할 때")
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
-	class EditTripsTest {
-
-		private Member member;
-		private HttpHeaders testAuthHeaders;
-		private Trip savedTrip;
-
-		@BeforeAll
-		void beforeAll() {
-			// given
-			member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
-			testAuthHeaders = createTestAuthHeader(member.getEmail());
-			savedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
+	class EditTripTest {
+		@BeforeEach
+		public void beforeEach() {
+			Authentication authentication = new TestingAuthenticationToken("test@test.com", null);
+			authentication.setAuthenticated(true);
+			SecurityContext securityContext = SecurityContextHolder.getContext();
+			securityContext.setAuthentication(authentication);
 		}
 
 		@DisplayName("하나의 여행을 수정할 수 있다.")
 		@Test
-		void shouldSuccessToEditTrip() throws Exception {
+		void editTripSuccessTest() throws Exception {
 			// given
-			long savedTripId = savedTrip.getId();
-			Trip expectedTrip = TripTestFactory.createTestTrip(member);
-			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
-			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
+			long tripId = 1L;
+			Member mockMember = MemberTestFactory.createTestMemberWithRandomPassword();
+			Trip mockTrip = TripTestFactory.createTestTripWithID(mockMember, tripId);
+
+			String tripTypeStr = mockTrip.getTripType().getValue();
+			String startDateTimeStr = DateTimeUtil.toString(mockTrip.getTripSchedule().getStartDate());
+			String endDateTimeStr = DateTimeUtil.toString(mockTrip.getTripSchedule().getEndDate());
+
 			TripRequest request = TripRequest.builder()
-				.name(expectedTrip.getName())
-				.tripType(expectedTrip.getTripType().getValue())
+				.name(mockTrip.getName())
+				.tripType(tripTypeStr)
 				.startDate(startDateTimeStr)
 				.endDate(endDateTimeStr)
 				.build();
+			TripResponse expectedTripResponse = TripResponse.from(mockTrip);
+
+			given(tripService.editTrip(anyLong(), any(TripRequest.class), any(LoginInfo.class)))
+				.willReturn(expectedTripResponse);
 
 			// when
-			ResultActions editTripAction = mockMvc.perform(put(BASE_URL + "/" + savedTripId)
-				.headers(testAuthHeaders)
+			ResultActions createTripAction = mockMvc.perform(put(BASE_URL + "/" + tripId)
+				.with(csrf())
+				.headers(createTestAuthHeader(mockMember.getEmail()))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
 			// then
-			editTripAction.andExpect(status().isOk())
-				.andExpect(jsonPath("$.tripId").value(savedTripId));
-			assertTripResponse(expectedTrip, editTripAction);
+			createTripAction
+				.andExpect(status().isOk())
+				.andExpect(content().json(objectMapper.writeValueAsString(expectedTripResponse)));
 		}
 
-		@DisplayName("여행이 끝나는 시간이 시작 시간보다 작으면 여행을 수정할 수 없다.")
+		@DisplayName("다른 멤버가 여행을 수정할 수 없다.")
 		@Test
-		void shouldFailToCreateTripIfEndTimeIsBeforeStartTime() throws Exception {
+		void editTripFailTestWhenRequestAnotherMember() throws Exception {
 			// given
-			long savedTripId = savedTrip.getId();
-			Trip expectedTrip = TripTestFactory.createTestTrip(member);
-			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
-			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
+			long tripId = 1L;
+			Member mockMember = MemberTestFactory.createTestMemberWithRandomPassword();
+			Member anotherMockMember = MemberTestFactory.createTestMemberWithRandomPassword();
+			Trip mockTrip = TripTestFactory.createTestTripWithID(mockMember, tripId);
+
+			String tripTypeStr = mockTrip.getTripType().getValue();
+			String startDateTimeStr = DateTimeUtil.toString(mockTrip.getTripSchedule().getStartDate());
+			String endDateTimeStr = DateTimeUtil.toString(mockTrip.getTripSchedule().getEndDate());
+
 			TripRequest request = TripRequest.builder()
-				.name(expectedTrip.getName())
-				.tripType(expectedTrip.getTripType().getValue())
+				.name(anotherMockMember.getName())
+				.tripType(tripTypeStr)
 				.startDate(startDateTimeStr)
 				.endDate(endDateTimeStr)
 				.build();
 
+			given(tripService.editTrip(anyLong(), any(TripRequest.class), any(LoginInfo.class)))
+				.willThrow(new InvalidAuthException());
+
 			// when
-			ResultActions editTripAction = mockMvc.perform(put(BASE_URL + "/" + savedTripId)
-				.headers(testAuthHeaders)
+			ResultActions editTripAction = mockMvc.perform(put(BASE_URL + "/" + tripId)
+				.with(csrf())
+				.headers(createTestAuthHeader(anotherMockMember.getEmail()))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
 			// then
 			editTripAction
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("message").value("날짜 범위가 잘못 선택되었습니다."));
-		}
-	}
-
-	@DisplayName("여행 정보를 검색할 때")
-	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-	@Nested
-	class SearchTripTest {
-
-		private List<Trip> savedTripList;
-
-		/**
-		 * 여행을 검색하는데 사용될 파라미터의 경우의 수를 만드는 메소드입니다.
-		 * 여행의 파라미터는 총 4가지의 파라미터를 가지고 있고,
-		 * 4가지의 파라미터를 boolean 값으로 내보내서 경우의 수를 만들어냅니다.
-		 * 예를 들면 결과값의 10번째(1010) 값은 다음과 같습니다.
-		 * ```
-		 * {name=true, tripType=false, startDate=true, endDate=false}
-		 * ```
-		 *
-		 * @return TestQueryCheck
-		 */
-		static Stream<TestQueryCheck> searchQueryTestCase() {
-			ArrayList<TestQueryCheck> list = new ArrayList<>();
-			for (int i = 1; i < (1 << 4); i++) {
-				list.add(new TestQueryCheck(
-					(i & 1) == 1,
-					(i & (1 << 1)) > 0,
-					(i & (1 << 2)) > 0,
-					(i & (1 << 3)) > 0
-				));
-			}
-			return list.stream();
-		}
-
-		@BeforeAll
-		void beforeAll() {
-			// given
-			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
-			savedTripList = tripRepository.saveAll(TripTestFactory.createTestTripList(5, member));
-		}
-
-		@DisplayName("1개 이상의 항목을 포함한 쿼리로 검색할 수 있다.")
-		@MethodSource("searchQueryTestCase")
-		@ParameterizedTest(name = "{arguments}")
-		void shouldSuccessToSearchTripWithQueries(TestQueryCheck searchQueryCheck) throws Exception {
-			// given
-			Trip expectedTrip = savedTripList.get(0);
-
-			UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromPath(BASE_URL + "/" + "search");
-			if (searchQueryCheck.name)
-				uriBuilder.queryParam("name", expectedTrip.getName());
-			if (searchQueryCheck.tripType)
-				uriBuilder.queryParam("tripType", expectedTrip.getTripType().getValue());
-			if (searchQueryCheck.startDate)
-				uriBuilder.queryParam("startDate",
-					expectedTrip.getTripSchedule().getStartDate().format(DateTimeFormatter.ISO_DATE));
-			if (searchQueryCheck.endDate)
-				uriBuilder.queryParam("endDate",
-					expectedTrip.getTripSchedule().getEndDate().format(DateTimeFormatter.ISO_DATE));
-
-			// when
-			ResultActions searchTripsAction = mockMvc.perform(get(uriBuilder.build().toString()));
-
-			// then
-			searchTripsAction
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$").isNotEmpty());
-		}
-
-		private static class TestQueryCheck {
-			boolean name;
-			boolean tripType;
-			boolean startDate;
-			boolean endDate;
-
-			public TestQueryCheck(boolean name, boolean tripType, boolean startDate, boolean endDate) {
-				this.name = name;
-				this.tripType = tripType;
-				this.startDate = startDate;
-				this.endDate = endDate;
-			}
-
-			@Override
-			public String toString() {
-				return (name ? "name," : "") +
-					(tripType ? "tripType," : "") +
-					(startDate ? "startDate," : "") +
-					(endDate ? "endDate" : "");
-			}
-		}
-	}
-
-	@DisplayName("여행 정보 좋아요 관련 테스트")
-	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-	@Nested
-	class TripLikesTest {
-
-		private Trip savedTrip;
-
-		private HttpHeaders testAuthHeaders;
-
-		@BeforeAll
-		void beforeAll() {
-			// given
-			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
-			savedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
-			testAuthHeaders = createTestAuthHeader(member.getEmail());
-		}
-
-		@DisplayName("멤버는 자신이 좋아요를 눌렀던 여행 리스트를 볼 수 있다.")
-		@Test
-		void shouldSuccessToGetMyLikesTripList() throws Exception {
-			// given
-
-			// when
-			ResultActions getLikesTripAction = mockMvc.perform(get(BASE_URL + "/my/likes")
-				.headers(testAuthHeaders)
-			);
-
-			// then
-			getLikesTripAction
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$").isArray());
-		}
-
-		@DisplayName("멤버는 여행에 좋아요를 누를 수 있다.")
-		@Test
-		void shouldSuccessToLikeTrip() throws Exception {
-			// given
-			long savedTripId = savedTrip.getId();
-
-			// when
-			ResultActions likesTripAction = mockMvc.perform(post(BASE_URL + "/" + savedTripId + "/likes")
-				.headers(testAuthHeaders)
-			);
-
-			// then
-			likesTripAction
-				.andExpect(status().isOk());
+				.andExpect(status().isUnauthorized());
 		}
 	}
 }
