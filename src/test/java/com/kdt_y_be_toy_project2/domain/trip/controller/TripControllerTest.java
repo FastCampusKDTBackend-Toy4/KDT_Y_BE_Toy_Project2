@@ -334,6 +334,30 @@ class TripControllerTest {
 
 		private List<Trip> savedTripList;
 
+		/**
+		 * 여행을 검색하는데 사용될 파라미터의 경우의 수를 만드는 메소드입니다.
+		 * 여행의 파라미터는 총 4가지의 파라미터를 가지고 있고,
+		 * 4가지의 파라미터를 boolean 값으로 내보내서 경우의 수를 만들어냅니다.
+		 * 예를 들면 결과값의 10번째(1010) 값은 다음과 같습니다.
+		 * ```
+		 * {name=true, tripType=false, startDate=true, endDate=false}
+		 * ```
+		 *
+		 * @return TestQueryCheck
+		 */
+		static Stream<TestQueryCheck> searchQueryTestCase() {
+			ArrayList<TestQueryCheck> list = new ArrayList<>();
+			for (int i = 1; i < (1 << 4); i++) {
+				list.add(new TestQueryCheck(
+					(i & 1) == 1,
+					(i & (1 << 1)) > 0,
+					(i & (1 << 2)) > 0,
+					(i & (1 << 3)) > 0
+				));
+			}
+			return list.stream();
+		}
+
 		@BeforeAll
 		void beforeAll() {
 			// given
@@ -342,33 +366,53 @@ class TripControllerTest {
 		}
 
 		@DisplayName("1개 이상의 항목을 포함한 쿼리로 검색할 수 있다.")
-		@ValueSource(ints = {0, 1, 2, 3, 4})
-		@ParameterizedTest
-		void shouldSuccessToSearchTripWithQueries(int tripIndex) throws Exception {
+		@MethodSource("searchQueryTestCase")
+		@ParameterizedTest(name = "{arguments}")
+		void shouldSuccessToSearchTripWithQueries(TestQueryCheck searchQueryCheck) throws Exception {
 			// given
-			Trip expectedTrip = savedTripList.get(tripIndex);
-			StringBuilder searchQueryURL = new StringBuilder(BASE_URL + "/" + "search?");
-			if (tripIndex <= 1) {
-				searchQueryURL.append("name=").append(expectedTrip.getName());
-			}
-			if (tripIndex >= 1 && tripIndex <= 2) {
-				searchQueryURL.append("&tripType=").append(expectedTrip.getTripType().getValue());
-			}
-			if (tripIndex >= 2 && tripIndex <= 3) {
-				searchQueryURL.append("&startDate=").append(
+			Trip expectedTrip = savedTripList.get(0);
+
+			UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromPath(BASE_URL + "/" + "search");
+			if (searchQueryCheck.name)
+				uriBuilder.queryParam("name", expectedTrip.getName());
+			if (searchQueryCheck.tripType)
+				uriBuilder.queryParam("tripType", expectedTrip.getTripType().getValue());
+			if (searchQueryCheck.startDate)
+				uriBuilder.queryParam("startDate",
 					expectedTrip.getTripSchedule().getStartDate().format(DateTimeFormatter.ISO_DATE));
-			}
-			if (tripIndex >= 3) {
-				searchQueryURL.append("&endDate=").append(
+			if (searchQueryCheck.endDate)
+				uriBuilder.queryParam("endDate",
 					expectedTrip.getTripSchedule().getEndDate().format(DateTimeFormatter.ISO_DATE));
 
 			// when
-			ResultActions searchTripsAction = mockMvc.perform(get(searchQueryURL.toString()));
+			ResultActions searchTripsAction = mockMvc.perform(get(uriBuilder.build().toString()));
 
 			// then
 			searchTripsAction
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$").isNotEmpty());
+		}
+
+		private static class TestQueryCheck {
+			boolean name;
+			boolean tripType;
+			boolean startDate;
+			boolean endDate;
+
+			public TestQueryCheck(boolean name, boolean tripType, boolean startDate, boolean endDate) {
+				this.name = name;
+				this.tripType = tripType;
+				this.startDate = startDate;
+				this.endDate = endDate;
+			}
+
+			@Override
+			public String toString() {
+				return (name ? "name," : "") +
+					(tripType ? "tripType," : "") +
+					(startDate ? "startDate," : "") +
+					(endDate ? "endDate" : "");
+			}
 		}
 	}
 
