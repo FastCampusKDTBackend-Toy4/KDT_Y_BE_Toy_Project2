@@ -3,6 +3,8 @@ spring:
     import: optional:file:.env[.properties]
   application:
     name: KDT-5
+  profiles:
+    active: dev
 
   datasource:
     url: jdbc:mysql://localhost:${LOCAL_MYSQL_PORT}/fc_sns?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true
