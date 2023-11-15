@@ -2,7 +2,7 @@ package com.kdt_y_be_toy_project2.domain.trip.dto;
 
 import java.time.LocalDate;
 
-import com.kdt_y_be_toy_project2.domain.trip.domain.TripType;
+import com.kdt_y_be_toy_project2.domain.trip.domain.type.TripType;
 import com.kdt_y_be_toy_project2.global.util.DateTimeUtil;
 
 import jakarta.validation.constraints.Pattern;

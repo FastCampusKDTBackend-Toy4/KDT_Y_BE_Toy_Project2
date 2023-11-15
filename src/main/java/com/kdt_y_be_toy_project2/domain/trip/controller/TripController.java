@@ -78,11 +78,12 @@ public class TripController {
 	@Operation(summary = "여행 등록", description = "하나의 여행을 등록하는 메소드입니다.")
 	@PostMapping
 	public ResponseEntity<TripResponse> createTrip(
-		@Valid @RequestBody final TripRequest request
+		@Valid @RequestBody final TripRequest request,
+		@SecurityContext LoginInfo loginInfo
 	) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(tripService.createTrip(request));
+			.body(tripService.createTrip(request, loginInfo));
 	}
 
 	@ApiResponses({
@@ -96,11 +97,12 @@ public class TripController {
 	public ResponseEntity<TripResponse> editTrip(
 		@Parameter(description = "여행 ID", required = true, example = "1")
 		@PathVariable(name = "trip_id") final Long tripId,
-		@Valid @RequestBody final TripRequest request
+		@Valid @RequestBody final TripRequest request,
+		@SecurityContext LoginInfo loginInfo
 	) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(tripService.editTrip(tripId, request));
+			.body(tripService.editTrip(tripId, request, loginInfo));
 	}
 
 	@GetMapping("/search")
@@ -129,5 +131,4 @@ public class TripController {
 		tripService.addLikeTrip(tripId, loginInfo.username());
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
-
 }

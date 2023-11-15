@@ -1,4 +1,4 @@
-package com.kdt_y_be_toy_project2.domain.trip.domain;
+package com.kdt_y_be_toy_project2.domain.trip.domain.type;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
