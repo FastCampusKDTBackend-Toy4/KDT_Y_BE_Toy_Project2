@@ -4,8 +4,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -14,15 +16,18 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kdt_y_be_toy_project2.domain.member.domain.Member;
@@ -38,6 +43,7 @@ import com.kdt_y_be_toy_project2.global.util.DateTimeUtil;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@WithMockUser
 @ActiveProfiles("test")
 class TripControllerTest {
 
@@ -71,6 +77,13 @@ class TripControllerTest {
 				.value(
 					DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate())
 				));
+	}
+
+	private HttpHeaders createTestAuthHeader(String email) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Access_Token", jwtProvider.createAccessToken(new JwtPayload(email, new Date())));
+		headers.add("Refresh_Token", jwtProvider.createRefreshToken(new JwtPayload(email, new Date())));
+		return headers;
 	}
 
 	@DisplayName("여행 정보를 조회할 때")
@@ -125,14 +138,23 @@ class TripControllerTest {
 	}
 
 	@DisplayName("여행 정보를 등록할 때")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
 	class CreateTripsTest {
+
+		private Member member;
+		private HttpHeaders testAuthHeaders;
+
+		@BeforeAll
+		public void beforeAll() {
+			member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			testAuthHeaders = createTestAuthHeader(member.getEmail());
+		}
 
 		@DisplayName("하나의 여행을 등록할 수 있다.")
 		@Test
 		void shouldSuccessToCreateTrip() throws Exception {
 			// given
-			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			Trip expectedTrip = TripTestFactory.createTestTrip(member);
 			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
 			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
@@ -145,6 +167,7 @@ class TripControllerTest {
 
 			// when
 			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
+				.headers(testAuthHeaders)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -157,7 +180,6 @@ class TripControllerTest {
 		@Test
 		void shouldFailToCreateTripWithEmptyName() throws Exception {
 			// given
-			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			Trip expectedTrip = TripTestFactory.createTestTrip(member);
 			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
 			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
@@ -169,6 +191,7 @@ class TripControllerTest {
 
 			// when
 			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
+				.headers(testAuthHeaders)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -183,7 +206,6 @@ class TripControllerTest {
 		@Test
 		void shouldFailToCreateTripIfEndTimeIsBeforeStartTime() throws Exception {
 			// given
-			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			Trip expectedTrip = TripTestFactory.createTestTrip(member);
 			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
 			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
@@ -196,6 +218,7 @@ class TripControllerTest {
 
 			// when
 			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
+				.headers(testAuthHeaders)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -209,7 +232,6 @@ class TripControllerTest {
 		@Test
 		void shouldFailToCreateTripWithInvalidTripType() throws Exception {
 			// given
-			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			Trip expectedTrip = TripTestFactory.createTestTrip(member);
 			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
 			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
@@ -221,6 +243,7 @@ class TripControllerTest {
 
 			// when
 			ResultActions createTripAction = mockMvc.perform(post(BASE_URL)
+				.headers(testAuthHeaders)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -238,12 +261,14 @@ class TripControllerTest {
 	class EditTripsTest {
 
 		private Member member;
+		private HttpHeaders testAuthHeaders;
 		private Trip savedTrip;
 
 		@BeforeAll
 		void beforeAll() {
 			// given
 			member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			testAuthHeaders = createTestAuthHeader(member.getEmail());
 			savedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
 		}
 
@@ -264,6 +289,7 @@ class TripControllerTest {
 
 			// when
 			ResultActions editTripAction = mockMvc.perform(put(BASE_URL + "/" + savedTripId)
+				.headers(testAuthHeaders)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -290,6 +316,7 @@ class TripControllerTest {
 
 			// when
 			ResultActions editTripAction = mockMvc.perform(put(BASE_URL + "/" + savedTripId)
+				.headers(testAuthHeaders)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)));
 
@@ -334,8 +361,6 @@ class TripControllerTest {
 			if (tripIndex >= 3) {
 				searchQueryURL.append("&endDate=").append(
 					expectedTrip.getTripSchedule().getEndDate().format(DateTimeFormatter.ISO_DATE));
-			}
-			System.out.println(searchQueryURL);
 
 			// when
 			ResultActions searchTripsAction = mockMvc.perform(get(searchQueryURL.toString()));
@@ -354,16 +379,14 @@ class TripControllerTest {
 
 		private Trip savedTrip;
 
-		private String accessToken;
-		private String refreshToken;
+		private HttpHeaders testAuthHeaders;
 
 		@BeforeAll
 		void beforeAll() {
 			// given
 			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			savedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
-			accessToken = jwtProvider.createAccessToken(new JwtPayload(member.getEmail(), new Date()));
-			refreshToken = jwtProvider.createRefreshToken(new JwtPayload(member.getEmail(), new Date()));
+			testAuthHeaders = createTestAuthHeader(member.getEmail());
 		}
 
 		@DisplayName("멤버는 자신이 좋아요를 눌렀던 여행 리스트를 볼 수 있다.")
@@ -373,8 +396,7 @@ class TripControllerTest {
 
 			// when
 			ResultActions getLikesTripAction = mockMvc.perform(get(BASE_URL + "/my/likes")
-				.header("Access_Token", accessToken)
-				.header("Refresh_Token", refreshToken)
+				.headers(testAuthHeaders)
 			);
 
 			// then
@@ -391,8 +413,7 @@ class TripControllerTest {
 
 			// when
 			ResultActions likesTripAction = mockMvc.perform(post(BASE_URL + "/" + savedTripId + "/likes")
-				.header("Access_Token", accessToken)
-				.header("Refresh_Token", refreshToken)
+				.headers(testAuthHeaders)
 			);
 
 			// then
