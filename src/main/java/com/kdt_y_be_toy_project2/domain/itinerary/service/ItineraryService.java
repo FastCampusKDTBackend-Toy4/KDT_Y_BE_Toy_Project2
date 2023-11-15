@@ -48,10 +48,10 @@ public class ItineraryService {
 			.orElseThrow(TripNotFoundException::new)
 			.getItineraries()
 			.stream()
-			.map(itinerary -> ItineraryResponse.from(itinerary))
+			.map(ItineraryResponse::from)
 			.toList();
 
-		if (itineraryResponses.size() == 0) {
+		if (itineraryResponses.isEmpty()) {
 			throw new ItineraryNotFoundException();
 		}
 		return itineraryResponses;

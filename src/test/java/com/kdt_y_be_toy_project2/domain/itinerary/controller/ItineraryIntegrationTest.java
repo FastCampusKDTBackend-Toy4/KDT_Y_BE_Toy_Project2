@@ -91,7 +91,7 @@ class ItineraryIntegrationTest {
 				objectMapper.convertValue(expecteditineraryResponse.accommodationInfoResponse(), LinkedHashMap.class)));
 	}
 
-	void issueJWTToken(Member testMember) throws Exception {
+	void issueJWTToken(Member testMember) {
 		Member savedMember = memberRepository.save(testMember);
 
 		JwtPayload jwtPayload = new JwtPayload(savedMember.getEmail(), new Date());
@@ -108,7 +108,7 @@ class ItineraryIntegrationTest {
 		private Itinerary itinerary;
 
 		@BeforeAll
-		void beforeAll() throws Exception {
+		void beforeAll() {
 			// given
 			Member member = MemberTestFactory.createTestMemberWithRandomPassword();
 			Trip trip = TripTestFactory.createTestTrip(member);
@@ -149,7 +149,6 @@ class ItineraryIntegrationTest {
 	@DisplayName("여정 정보를 등록할 때")
 	@Nested
 	class CreateItinerariesTest {
-		Trip trip;
 
 		@DisplayName("하나의 여정을 등록할 수 있다.")
 		@Test
@@ -181,7 +180,6 @@ class ItineraryIntegrationTest {
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
 	class EditItineraryTest {
-		Trip trip;
 
 		@DisplayName("하나의 여정을 수정할 수 있다.")
 		@Test
@@ -271,7 +269,7 @@ class ItineraryIntegrationTest {
 
 		@DisplayName("여정 기간이 여행 기간에 포함되지 않는 경우 에러를 발생한다.")
 		@Test
-		void shouldNotContainsItineraryDuration() throws Exception {
+		void shouldNotContainsItineraryDuration() {
 			//given
 			Member member = MemberTestFactory.createTestMemberWithRandomPassword();
 			Trip trip = TripTestFactory.createTestTrip(member);
@@ -293,10 +291,6 @@ class ItineraryIntegrationTest {
 				itineraryService.createItinerary(loginInfo, savedTrip.getId(), itineraryRequest));
 		}
 
-		/**
-		 *
-		 * @throws Exception
-		 */
 		@DisplayName("여정 수정 권한이 없어서 에러를 발생한다.")
 		@Test
 		void shouldNotAccessToUpdateItinearary() throws Exception {
