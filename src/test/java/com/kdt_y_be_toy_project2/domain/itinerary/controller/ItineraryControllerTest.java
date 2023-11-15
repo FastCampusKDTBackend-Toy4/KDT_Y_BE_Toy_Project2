@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 
+import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -263,7 +264,7 @@ class ItineraryControllerTest {
 
 			// then
 			assertThrows(InvalidItineraryDurationException.class, () ->
-				itineraryService.createItinerary(trip.getId(), itineraryRequest));
+				itineraryService.createItinerary(new LoginInfo(trip.getMember().getEmail()), trip.getId(), itineraryRequest));
 		}
 
 	}
