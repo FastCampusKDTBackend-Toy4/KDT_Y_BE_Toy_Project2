@@ -3,16 +3,8 @@ spring:
     import: optional:file:.env[.properties]
   application:
     name: KDT-5
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: create
-  datasource:
-    url: jdbc:h2:mem:test
-    username: sa
-    driver-class-name: org.h2.Driver
-
-
+  profiles:
+    include: dev
 
 service:
   jwt:
@@ -23,3 +15,19 @@ service:
 kakao:
   rest:
     api-key: ${KAKAO_API_KEY}
+  datasource:
+    url: jdbc:mysql://localhost:${LOCAL_MYSQL_PORT}/fc_sns?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${LOCAL_MYSQL_USERNAME}
+    password: ${LOCAL_MYSQL_PASSWORD}
+
+  jpa:
+    properties:
+      format_sql: true
+      dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: validate
+
+logging:
+  level:
+    org.springframework.security: debug

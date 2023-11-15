@@ -61,6 +61,9 @@ public class Trip {
 	})
 	private DateScheduleInfo tripSchedule;
 
+	@OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+	List<Comment> comments = new ArrayList<>();
+
 	@Builder
 	private Trip(Long id, Member member, String name, TripType tripType, DateScheduleInfo tripSchedule) {
 		this.id = id;
