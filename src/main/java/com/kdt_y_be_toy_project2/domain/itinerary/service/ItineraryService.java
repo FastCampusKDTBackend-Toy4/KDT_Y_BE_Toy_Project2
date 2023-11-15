@@ -3,18 +3,18 @@ package com.kdt_y_be_toy_project2.domain.itinerary.service;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
-import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidDateException;
-import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidItineraryDurationException;
-import com.kdt_y_be_toy_project2.domain.itinerary.exception.ItineraryNotFoundException;
-import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundException;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.*;
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
+import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
+import com.kdt_y_be_toy_project2.global.resolver.SecurityContext;
 import com.kdt_y_be_toy_project2.global.util.LocalDateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -48,21 +48,25 @@ public class ItineraryService {
                 .orElseThrow();
     }
 
-    public ItineraryResponse createItinerary(final Long tripId, final ItineraryRequest request) {
+    public ItineraryResponse createItinerary(final LoginInfo loginInfo, final Long tripId, final ItineraryRequest request) {
 
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
+
+        checkAuth (loginInfo, retrivedTrip);
         checkItineraryDuration(retrivedTrip, request);
         checkInvalidDate(request);
+
         Itinerary savedItinerary = Optional.of(itineraryRepository.save(ItineraryRequest.toEntity(request, retrivedTrip))).orElseThrow();
         retrivedTrip.getItineraries().add(savedItinerary);
 
         return Optional.of(ItineraryResponse.from(savedItinerary)).orElseThrow();
     }
 
-    public ItineraryResponse editItinerary(final Long tripId, final Long itineraryId, final ItineraryRequest request) {
+    public ItineraryResponse editItinerary(final LoginInfo loginInfo, final Long tripId, final Long itineraryId, final ItineraryRequest request) {
 
         Trip retrivedTrip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
 
+        checkAuth (loginInfo, retrivedTrip);
         Itinerary retrivedItinerary = findItineraryInTrip(retrivedTrip,itineraryId).orElseThrow();
         retrivedItinerary.update(ItineraryRequest.toEntity(request, retrivedTrip));
         checkItineraryDuration(retrivedItinerary.getTrip(), request);
@@ -103,6 +107,12 @@ public class ItineraryService {
         }
 
         throw new  ItineraryNotFoundException();
+    }
+
+    void checkAuth (LoginInfo loginInfo, Trip trip) {
+        if (!loginInfo.username().equals(trip.getMember().getEmail())) {
+            throw new InvalidAuthException();
+        }
     }
 
 }

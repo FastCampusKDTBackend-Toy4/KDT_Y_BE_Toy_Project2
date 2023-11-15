@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidAuthException;
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidItineraryDurationException;
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.ItineraryNotFoundException;
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundException;
@@ -16,9 +17,11 @@ import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
 import com.kdt_y_be_toy_project2.global.config.CustomHttpHeaders;
 import com.kdt_y_be_toy_project2.global.factory.ItineraryTestFactory;
+import com.kdt_y_be_toy_project2.global.factory.MemberTestFactory;
 import com.kdt_y_be_toy_project2.global.factory.TripTestFactory;
 import com.kdt_y_be_toy_project2.global.jwt.JwtPayload;
 import com.kdt_y_be_toy_project2.global.jwt.JwtProvider;
+import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,6 +43,7 @@ import java.util.LinkedHashMap;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,14 +53,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class ItineraryIntegrationTest {
-
-    //jwt
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtProvider jwtProvider;
@@ -75,6 +71,9 @@ class ItineraryIntegrationTest {
 
     @Autowired
     private ItineraryRepository itineraryRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     private String accessToken;
 
@@ -95,8 +94,7 @@ class ItineraryIntegrationTest {
     }
 
 
-    void issueJWTToken() throws Exception {
-        Member testMember = Member.builder().email("test@naver.com").password(passwordEncoder.encode("1234")).name("test").build();
+    void issueJWTToken(Member testMember) throws Exception {
         Member savedMember = memberRepository.save(testMember);
 
         JwtPayload jwtPayload = new JwtPayload(savedMember.getEmail(), new Date());
@@ -118,8 +116,9 @@ class ItineraryIntegrationTest {
         @BeforeAll
         void beforeAll() throws Exception {
             // given
-            issueJWTToken();
-            Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
+            Trip trip = TripTestFactory.createTestTrip();
+            issueJWTToken(trip.getMember());
+            trip = tripRepository.save(trip);
             itinerary = itineraryRepository.save(ItineraryTestFactory.createTestItinerary(trip));
             tripId = trip.getId();
         }
@@ -163,8 +162,9 @@ class ItineraryIntegrationTest {
         @Test
         void shouldSuccessToCreateItinerary() throws Exception {
             // given
-            issueJWTToken();
-            trip = tripRepository.save(TripTestFactory.createTestTrip());
+            Trip trip = TripTestFactory.createTestTrip();
+            issueJWTToken(trip.getMember());
+            trip = tripRepository.save(trip);
 
             ItineraryRequest request = ItineraryTestFactory.buildItineraryRequest(DateTimeScheduleInfo.builder()
                     .startDateTime(LocalDateTime.from(trip.getTripSchedule().getStartDate().atStartOfDay()))
@@ -194,8 +194,10 @@ class ItineraryIntegrationTest {
         @Test
         void shouldSuccessToEditItinerary() throws Exception {
             // given
-            issueJWTToken();
-            trip = tripRepository.save(TripTestFactory.createTestTrip());
+            Trip trip = TripTestFactory.createTestTrip();
+            issueJWTToken(trip.getMember());
+            trip = tripRepository.save(trip);
+
             Itinerary savedItinerary = itineraryRepository.save(ItineraryTestFactory.createTestItinerary(trip));
             trip.getItineraries().add(savedItinerary);
 
@@ -233,8 +235,9 @@ class ItineraryIntegrationTest {
         @Test
         void NotExistItinerary() throws Exception {
             // given
-            issueJWTToken();
-            Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
+            Trip trip = TripTestFactory.createTestTrip();
+            issueJWTToken(trip.getMember());
+            trip = tripRepository.save(trip);
 
             // when
             ResultActions getAllItinerariesAction = mockMvc.perform(get("/v1/trips/" + trip.getId() + "/itineraries")
@@ -252,8 +255,10 @@ class ItineraryIntegrationTest {
         @Test
         void NotExistTrip() throws Exception {
             //given
-            issueJWTToken();
-            Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
+            Trip trip = TripTestFactory.createTestTrip();
+            issueJWTToken(trip.getMember());
+            trip = tripRepository.save(trip);
+
             Itinerary itinerary = itineraryRepository.save(ItineraryTestFactory.createTestItinerary(trip));
 
             // when
@@ -274,10 +279,14 @@ class ItineraryIntegrationTest {
         @Test
         void shouldNotContainsItineraryDuration() {
             //given
-            Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
+            Trip trip = TripTestFactory.createTestTrip();
+            memberRepository.save(trip.getMember());
+            final Trip savedTrip = tripRepository.save(trip);
 
-            LocalDate tripStart = trip.getTripSchedule().getStartDate();
-            LocalDate tripEnd = trip.getTripSchedule().getEndDate();
+
+            LocalDate tripStart = savedTrip.getTripSchedule().getStartDate();
+            LocalDate tripEnd = savedTrip.getTripSchedule().getEndDate();
+            LoginInfo loginInfo = new LoginInfo(savedTrip.getMember().getEmail());
 
             DateTimeScheduleInfo missSchedule = DateTimeScheduleInfo.builder()
                     .startDateTime(LocalDateTime.from(tripStart.minusDays(10).atStartOfDay()))
@@ -287,7 +296,43 @@ class ItineraryIntegrationTest {
 
             // then
             assertThrows(InvalidItineraryDurationException.class, () ->
-                    itineraryService.createItinerary(trip.getId(), itineraryRequest));
+                    itineraryService.createItinerary(loginInfo, savedTrip.getId(), itineraryRequest));
+        }
+
+        /**
+         *
+         * @throws Exception
+         */
+        @DisplayName("여정 수정 권한이 없어서 에러를 발생한다.")
+        @Test
+        void shouldNotAccessToUpdateItinearary() throws Exception {
+            //given
+            Trip testTrip = TripTestFactory.createTestTrip();
+            memberRepository.save(testTrip.getMember());
+            Trip savedtrip = tripRepository.save(testTrip);
+            //여행을 저장한 멤버가 아닌, 새로운 멤버가 생성되고, JWT TOKEN을 발급받음.
+            issueJWTToken(MemberTestFactory.createTestMemberWithRandomPassword());
+
+            Itinerary savedItinerary = itineraryRepository.save(ItineraryTestFactory.createTestItinerary(savedtrip));
+            savedtrip.getItineraries().add(savedItinerary);
+
+            ItineraryRequest request = ItineraryTestFactory.buildItineraryRequest(DateTimeScheduleInfo.builder()
+                    .startDateTime(LocalDateTime.from(savedtrip.getTripSchedule().getStartDate().plusDays(1).atStartOfDay()))
+                    .endDateTime(LocalDateTime.from(savedtrip.getTripSchedule().getEndDate().atStartOfDay())).build());
+
+            // when
+            ResultActions editItineraryAction = mockMvc.perform(
+                    put("/v1/trips/" + savedtrip.getId() + "/itineraries/" + savedItinerary.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+                            .header(CustomHttpHeaders.ACCESS_TOKEN,accessToken)
+                            .header(CustomHttpHeaders.REFRESH_TOKEN,refreshToken));
+
+            // then
+            editItineraryAction
+                    .andDo(MockMvcResultHandlers.print())
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidAuthException));
         }
 
     }
