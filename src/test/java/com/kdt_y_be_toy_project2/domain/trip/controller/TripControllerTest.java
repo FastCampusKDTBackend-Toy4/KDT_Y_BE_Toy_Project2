@@ -35,10 +35,11 @@ import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
+import com.kdt_y_be_toy_project2.global.config.CustomHttpHeaders;
 import com.kdt_y_be_toy_project2.global.factory.MemberTestFactory;
 import com.kdt_y_be_toy_project2.global.factory.TripTestFactory;
 import com.kdt_y_be_toy_project2.global.jwt.JwtPayload;
-import com.kdt_y_be_toy_project2.global.jwt.JwtProvider;
+import com.kdt_y_be_toy_project2.global.jwt.service.JwtService;
 import com.kdt_y_be_toy_project2.global.util.DateTimeUtil;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -62,7 +63,7 @@ class TripControllerTest {
 	private MemberRepository memberRepository;
 
 	@Autowired
-	private JwtProvider jwtProvider;
+	private JwtService jwtService;
 
 	private void assertTripResponse(Trip expectedTrip, ResultActions resultActions) throws Exception {
 		// then
@@ -81,8 +82,10 @@ class TripControllerTest {
 
 	private HttpHeaders createTestAuthHeader(String email) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("Access_Token", jwtProvider.createAccessToken(new JwtPayload(email, new Date())));
-		headers.add("Refresh_Token", jwtProvider.createRefreshToken(new JwtPayload(email, new Date())));
+		headers.add(
+			CustomHttpHeaders.ACCESS_TOKEN,
+			jwtService.createTokenPair(new JwtPayload(email, new Date())).accessToken()
+		);
 		return headers;
 	}
 
