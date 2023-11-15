@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,10 +37,13 @@ import com.kdt_y_be_toy_project2.domain.itinerary.exception.ItineraryNotFoundExc
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundException;
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
 import com.kdt_y_be_toy_project2.domain.itinerary.service.ItineraryService;
+import com.kdt_y_be_toy_project2.domain.member.domain.Member;
+import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
 import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
 import com.kdt_y_be_toy_project2.global.factory.ItineraryFactory;
+import com.kdt_y_be_toy_project2.global.factory.MemberTestFactory;
 import com.kdt_y_be_toy_project2.global.factory.TripTestFactory;
 import com.kdt_y_be_toy_project2.global.util.LocalDateTimeUtil;
 
@@ -62,6 +64,9 @@ class ItineraryControllerTest {
 
 	@Autowired
 	private TripRepository tripRepository;
+
+	@Autowired
+	private MemberRepository memberRepository;
 
 	@Autowired
 	private ItineraryRepository itineraryRepository;
@@ -111,7 +116,8 @@ class ItineraryControllerTest {
 		@BeforeAll
 		void beforeAll() {
 			// given
-			Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			Trip trip = tripRepository.save(TripTestFactory.createTestTrip(member));
 			itinerary = itineraryRepository.save(ItineraryFactory.createTestItinerary(trip));
 			tripId = trip.getId();
 		}
@@ -152,7 +158,8 @@ class ItineraryControllerTest {
 		@Test
 		void shouldSuccessToCreateItinerary() throws Exception {
 			// given
-			trip = tripRepository.save(TripTestFactory.createTestTrip());
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			trip = tripRepository.save(TripTestFactory.createTestTrip(member));
 
 			ItineraryRequest request = buildItineraryRequest(DateTimeScheduleInfo.builder()
 				.startDateTime(LocalDateTime.from(trip.getTripSchedule().getStartDate().atStartOfDay()))
@@ -180,13 +187,14 @@ class ItineraryControllerTest {
 		@Test
 		void shouldSuccessToEditItinerary() throws Exception {
 			// given
-			trip = tripRepository.save(TripTestFactory.createTestTrip());
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			trip = tripRepository.save(TripTestFactory.createTestTrip(member));
 			Itinerary savedItinerary = itineraryRepository.save(ItineraryFactory.createTestItinerary(trip));
 			trip.getItineraries().add(savedItinerary);
 
 			long tripId = trip.getId();
 			ItineraryRequest request = buildItineraryRequest(DateTimeScheduleInfo.builder()
-					.startDateTime(LocalDateTime.from(trip.getTripSchedule().getStartDate().plusDays(1).atStartOfDay()))
+				.startDateTime(LocalDateTime.from(trip.getTripSchedule().getStartDate().plusDays(1).atStartOfDay()))
 				.endDateTime(LocalDateTime.from(trip.getTripSchedule().getEndDate().atStartOfDay())).build());
 
 			long savedItineraryId = savedItinerary.getId();
@@ -201,7 +209,7 @@ class ItineraryControllerTest {
 
 			// then
 			editItineraryAction
-					.andDo(MockMvcResultHandlers.print());
+				.andDo(MockMvcResultHandlers.print());
 
 			assertItineraryResponse(expectedItinerary, editItineraryAction);
 		}
@@ -216,7 +224,8 @@ class ItineraryControllerTest {
 		@Test
 		void NotExistItinerary() throws Exception {
 			// given
-			Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			Trip trip = tripRepository.save(TripTestFactory.createTestTrip(member));
 
 			// when
 			ResultActions getAllItinerariesAction = mockMvc.perform(get("/v1/trips/" + trip.getId() + "/itineraries"));
@@ -232,7 +241,8 @@ class ItineraryControllerTest {
 		@Test
 		void NotExistTrip() throws Exception {
 			//given
-			Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			Trip trip = tripRepository.save(TripTestFactory.createTestTrip(member));
 			Itinerary itinerary = itineraryRepository.save(ItineraryFactory.createTestItinerary(trip));
 
 			// when
@@ -250,7 +260,8 @@ class ItineraryControllerTest {
 		@Test
 		void shouldNotContainsItineraryDuration() {
 			//given
-			Trip trip = tripRepository.save(TripTestFactory.createTestTrip());
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			Trip trip = tripRepository.save(TripTestFactory.createTestTrip(member));
 
 			LocalDate tripStart = trip.getTripSchedule().getStartDate();
 			LocalDate tripEnd = trip.getTripSchedule().getEndDate();

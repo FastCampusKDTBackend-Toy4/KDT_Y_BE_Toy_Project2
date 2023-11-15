@@ -25,11 +25,12 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kdt_y_be_toy_project2.domain.member.dto.request.SignUpRequest;
-import com.kdt_y_be_toy_project2.domain.member.service.MemberService;
+import com.kdt_y_be_toy_project2.domain.member.domain.Member;
+import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
+import com.kdt_y_be_toy_project2.global.factory.MemberTestFactory;
 import com.kdt_y_be_toy_project2.global.factory.TripTestFactory;
 import com.kdt_y_be_toy_project2.global.jwt.JwtPayload;
 import com.kdt_y_be_toy_project2.global.jwt.JwtProvider;
@@ -52,7 +53,7 @@ class TripControllerTest {
 	private TripRepository tripRepository;
 
 	@Autowired
-	private MemberService memberService;
+	private MemberRepository memberRepository;
 
 	@Autowired
 	private JwtProvider jwtProvider;
@@ -79,7 +80,8 @@ class TripControllerTest {
 		@Test
 		void shouldSuccessToGetAllTrips() throws Exception {
 			// given
-			tripRepository.saveAll(TripTestFactory.createTestTripList(5));
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			tripRepository.saveAll(TripTestFactory.createTestTripList(5, member));
 
 			// when
 			ResultActions getAllTripsAction = mockMvc.perform(get(BASE_URL));
@@ -94,7 +96,8 @@ class TripControllerTest {
 		@Test
 		void shouldSuccessToGetTripById() throws Exception {
 			// given
-			Trip expectedTrip = tripRepository.save(TripTestFactory.createTestTrip());
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			Trip expectedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
 			long tripId = expectedTrip.getId();
 
 			// when
@@ -129,7 +132,8 @@ class TripControllerTest {
 		@Test
 		void shouldSuccessToCreateTrip() throws Exception {
 			// given
-			Trip expectedTrip = TripTestFactory.createTestTrip();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			Trip expectedTrip = TripTestFactory.createTestTrip(member);
 			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
 			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
 			TripRequest request = TripRequest.builder()
@@ -153,7 +157,8 @@ class TripControllerTest {
 		@Test
 		void shouldFailToCreateTripWithEmptyName() throws Exception {
 			// given
-			Trip expectedTrip = TripTestFactory.createTestTrip();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			Trip expectedTrip = TripTestFactory.createTestTrip(member);
 			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
 			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
 			TripRequest request = TripRequest.builder()
@@ -178,7 +183,8 @@ class TripControllerTest {
 		@Test
 		void shouldFailToCreateTripIfEndTimeIsBeforeStartTime() throws Exception {
 			// given
-			Trip expectedTrip = TripTestFactory.createTestTrip();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			Trip expectedTrip = TripTestFactory.createTestTrip(member);
 			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
 			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
 			TripRequest request = TripRequest.builder()
@@ -203,7 +209,8 @@ class TripControllerTest {
 		@Test
 		void shouldFailToCreateTripWithInvalidTripType() throws Exception {
 			// given
-			Trip expectedTrip = TripTestFactory.createTestTrip();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			Trip expectedTrip = TripTestFactory.createTestTrip(member);
 			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
 			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
 			TripRequest request = TripRequest.builder()
@@ -230,12 +237,14 @@ class TripControllerTest {
 	@Nested
 	class EditTripsTest {
 
+		private Member member;
 		private Trip savedTrip;
 
 		@BeforeAll
 		void beforeAll() {
 			// given
-			savedTrip = tripRepository.save(TripTestFactory.createTestTrip());
+			member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			savedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
 		}
 
 		@DisplayName("하나의 여행을 수정할 수 있다.")
@@ -243,7 +252,7 @@ class TripControllerTest {
 		void shouldSuccessToEditTrip() throws Exception {
 			// given
 			long savedTripId = savedTrip.getId();
-			Trip expectedTrip = TripTestFactory.createTestTrip();
+			Trip expectedTrip = TripTestFactory.createTestTrip(member);
 			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
 			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
 			TripRequest request = TripRequest.builder()
@@ -269,7 +278,7 @@ class TripControllerTest {
 		void shouldFailToCreateTripIfEndTimeIsBeforeStartTime() throws Exception {
 			// given
 			long savedTripId = savedTrip.getId();
-			Trip expectedTrip = TripTestFactory.createTestTrip();
+			Trip expectedTrip = TripTestFactory.createTestTrip(member);
 			String startDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getEndDate());
 			String endDateTimeStr = DateTimeUtil.toString(expectedTrip.getTripSchedule().getStartDate());
 			TripRequest request = TripRequest.builder()
@@ -301,7 +310,8 @@ class TripControllerTest {
 		@BeforeAll
 		void beforeAll() {
 			// given
-			savedTripList = tripRepository.saveAll(TripTestFactory.createTestTripList(5));
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			savedTripList = tripRepository.saveAll(TripTestFactory.createTestTripList(5, member));
 		}
 
 		@DisplayName("1개 이상의 항목을 포함한 쿼리로 검색할 수 있다.")
@@ -350,12 +360,10 @@ class TripControllerTest {
 		@BeforeAll
 		void beforeAll() {
 			// given
-			savedTrip = tripRepository.save(TripTestFactory.createTestTrip());
-			memberService.signUp(
-				new SignUpRequest("test@test.com", "test", "testname1")
-			);
-			accessToken = jwtProvider.createAccessToken(new JwtPayload("test@test.com", new Date()));
-			refreshToken = jwtProvider.createRefreshToken(new JwtPayload("test@test.com", new Date()));
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
+			savedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
+			accessToken = jwtProvider.createAccessToken(new JwtPayload(member.getEmail(), new Date()));
+			refreshToken = jwtProvider.createRefreshToken(new JwtPayload(member.getEmail(), new Date()));
 		}
 
 		@DisplayName("멤버는 자신이 좋아요를 눌렀던 여행 리스트를 볼 수 있다.")
