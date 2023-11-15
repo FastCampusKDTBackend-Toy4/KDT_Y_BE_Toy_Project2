@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.kdt_y_be_toy_project2.domain.member.domain.Member;
+import com.kdt_y_be_toy_project2.domain.member.exception.MemberNotFoundException;
 import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
 import com.kdt_y_be_toy_project2.domain.model.exception.InvalidDateRangeException;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Likes;
@@ -55,14 +56,14 @@ public class TripService {
 	}
 
 	public TripResponse createTrip(final TripRequest request, LoginInfo loginInfo) {
-		Member member = memberRepository.findById(loginInfo.username()).orElseThrow(NullPointerException::new);
+		Member member = memberRepository.findById(loginInfo.username()).orElseThrow(MemberNotFoundException::new);
 		return Optional.of(tripRepository.save(TripRequest.toEntity(request, member)))
 			.map(TripResponse::from)
 			.orElseThrow();
 	}
 
 	public TripResponse editTrip(final Long tripId, final TripRequest request, LoginInfo loginInfo) {
-		Member member = memberRepository.findById(loginInfo.username()).orElseThrow(NullPointerException::new);
+		Member member = memberRepository.findById(loginInfo.username()).orElseThrow(MemberNotFoundException::new);
 		return TripResponse.from(tripRepository.findById(tripId)
 			.map(trip -> trip.update(TripRequest.toEntity(request, member)))
 			.orElseThrow(TripNotFoundException::new));
