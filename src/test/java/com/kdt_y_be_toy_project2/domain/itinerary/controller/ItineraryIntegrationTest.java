@@ -299,6 +299,10 @@ class ItineraryIntegrationTest {
                     itineraryService.createItinerary(loginInfo, savedTrip.getId(), itineraryRequest));
         }
 
+        /**
+         *
+         * @throws Exception
+         */
         @DisplayName("여정 수정 권한이 없어서 에러를 발생한다.")
         @Test
         void shouldNotAccessToUpdateItinearary() throws Exception {
@@ -329,7 +333,6 @@ class ItineraryIntegrationTest {
                     .andDo(MockMvcResultHandlers.print())
                     .andExpect(status().isUnauthorized())
                     .andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidAuthException));
-
         }
 
     }
