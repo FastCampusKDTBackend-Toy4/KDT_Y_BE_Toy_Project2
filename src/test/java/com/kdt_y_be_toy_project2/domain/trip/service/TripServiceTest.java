@@ -21,6 +21,7 @@ import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
 import com.kdt_y_be_toy_project2.domain.model.DateScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.domain.type.TripType;
+import com.kdt_y_be_toy_project2.domain.trip.dto.FindTripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripNotFoundException;
@@ -109,10 +110,10 @@ class TripServiceTest {
 		given(tripRepository.findById(anyLong())).willReturn(Optional.ofNullable(trip2));
 
 		// when
-		TripResponse tripResponse = tripService.getTripById(anyLong());
+		FindTripResponse findTripResponse = tripService.getTripById(anyLong());
 
 		// then
-		assertThat(tripResponse.tripName()).isEqualTo("Test Trip2");
+		assertThat(findTripResponse.tripName()).isEqualTo("Test Trip2");
 	}
 
 	@DisplayName("여행 ID 조회 실패")

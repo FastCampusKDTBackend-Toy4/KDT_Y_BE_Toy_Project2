@@ -1,6 +1,7 @@
 package com.kdt_y_be_toy_project2.domain.trip.dto;
 
 import java.util.List;
+import java.util.Map;
 
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
@@ -10,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-public record TripResponse(
+public record FindTripResponse(
 	@Schema(description = "여행 ID")
 	Long tripId,
 
@@ -26,21 +27,23 @@ public record TripResponse(
 	@Schema(description = "여행 국내외여부")
 	String tripType,
 
-	@Schema(description = "여행 좋아요 개수")
-	Long likesCount,
-
 	@Schema(description = "여행에 포함된 여정 리스트")
-	List<ItineraryResponse> itineraries
+	List<ItineraryResponse> itineraries,
+
+	@Schema(description = "여행 댓글")
+	CommentResponse commentResponse
 ) {
-	public static TripResponse from(Trip trip) {
-		return TripResponse.builder()
+	public static FindTripResponse from(Trip trip, List<Map<String, Object>> lists) {
+		CommentResponse commentResponse = new CommentResponse(lists);
+
+		return FindTripResponse.builder()
 			.tripId(trip.getId())
 			.tripName(trip.getName())
 			.startDate(DateTimeUtil.toString(trip.getTripSchedule().getStartDate()))
 			.endDate(DateTimeUtil.toString(trip.getTripSchedule().getEndDate()))
 			.tripType(trip.getTripType().getValue())
-			.likesCount(trip.getLikesCount())
 			.itineraries(trip.getItineraries().stream().map(ItineraryResponse::from).toList())
+			.commentResponse(commentResponse)
 			.build();
 	}
 }

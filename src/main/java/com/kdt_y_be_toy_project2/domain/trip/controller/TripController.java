@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kdt_y_be_toy_project2.domain.trip.dto.FindTripResponse;
+import com.kdt_y_be_toy_project2.domain.trip.dto.TripCommentRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripSearchRequest;
@@ -60,7 +62,7 @@ public class TripController {
 	})
 	@Operation(summary = "여행 조회", description = "하나의 여행을 조회하는 메소드입니다.")
 	@GetMapping("/{trip_id}")
-	public ResponseEntity<TripResponse> getTripById(
+	public ResponseEntity<FindTripResponse> getTripById(
 		@Parameter(description = "여행 ID", required = true, example = "1")
 		@PathVariable(name = "trip_id") final Long tripId
 	) {
@@ -129,6 +131,14 @@ public class TripController {
 		@SecurityContext LoginInfo loginInfo
 	) {
 		tripService.addLikeTrip(tripId, loginInfo.username());
+		return ResponseEntity.status(HttpStatus.OK).build();
+	}
+
+	@PostMapping("/{trip_id}/comments")
+	public ResponseEntity<Void> addLikeTrip(@Valid @RequestBody TripCommentRequest tripCommentRequest,
+		@PathVariable(name = "trip_id") final Long tripId, @SecurityContext LoginInfo loginInfo) {
+		tripService.createComment(tripCommentRequest, tripId, loginInfo.username());
+
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 }

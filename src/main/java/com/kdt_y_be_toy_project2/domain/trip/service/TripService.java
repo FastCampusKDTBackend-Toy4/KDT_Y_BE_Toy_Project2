@@ -1,7 +1,9 @@
 package com.kdt_y_be_toy_project2.domain.trip.service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -13,15 +15,19 @@ import com.kdt_y_be_toy_project2.domain.member.exception.InvalidAuthException;
 import com.kdt_y_be_toy_project2.domain.member.exception.MemberNotFoundException;
 import com.kdt_y_be_toy_project2.domain.member.repository.MemberRepository;
 import com.kdt_y_be_toy_project2.domain.model.exception.InvalidDateRangeException;
+import com.kdt_y_be_toy_project2.domain.trip.domain.Comment;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Likes;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.domain.id.LikesID;
+import com.kdt_y_be_toy_project2.domain.trip.dto.FindTripResponse;
+import com.kdt_y_be_toy_project2.domain.trip.dto.TripCommentRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripSearchRequest;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripAlreadyLikesException;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripNotFoundException;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripSearchIllegalArgumentException;
+import com.kdt_y_be_toy_project2.domain.trip.repository.CommentRepository;
 import com.kdt_y_be_toy_project2.domain.trip.repository.LikesRepository;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
 import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
@@ -36,6 +42,7 @@ public class TripService {
 	private final TripRepository tripRepository;
 	private final LikesRepository likesRepository;
 	private final MemberRepository memberRepository;
+	private final CommentRepository commentRepository;
 
 	@Transactional(readOnly = true)
 	public List<TripResponse> getAllTrips() {
@@ -44,16 +51,23 @@ public class TripService {
 		if (trips.isEmpty()) {
 			throw new TripNotFoundException();
 		}
-		return trips
-			.stream().map(TripResponse::from)
-			.toList();
+		return trips.stream().map(TripResponse::from).toList();
 	}
 
 	@Transactional(readOnly = true)
-	public TripResponse getTripById(final Long tripId) {
-		return tripRepository.findById(tripId)
-			.map(TripResponse::from)
-			.orElseThrow(TripNotFoundException::new);
+	public FindTripResponse getTripById(final Long tripId) {
+		Trip trip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
+		List<Map<String, Object>> commentInfos = trip.getComments().stream()
+			.map(comment -> {
+				Map<String, Object> commentInfo = new HashMap<>();
+				commentInfo.put("content", comment.getContent());
+				commentInfo.put("email", comment.getMember().getEmail());
+				commentInfo.put("createDateTime", comment.getCreatedDateTime());
+
+				return commentInfo;
+			}).toList();
+
+		return FindTripResponse.from(trip, commentInfos);
 	}
 
 	public TripResponse createTrip(final TripRequest request, LoginInfo loginInfo) {
@@ -141,5 +155,16 @@ public class TripService {
 			.trip(trip)
 			.build();
 		likesRepository.save(newLikes);
+	}
+
+	public void createComment(TripCommentRequest dto, Long tripId, String email) {
+		Trip trip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
+		Member member = memberRepository.findByEmail(email).orElseThrow();
+		Comment comment = Comment.builder()
+			.trip(trip)
+			.member(member)
+			.content(dto.content())
+			.build();
+		commentRepository.save(comment);
 	}
 }
