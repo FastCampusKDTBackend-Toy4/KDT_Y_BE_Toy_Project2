@@ -1,15 +1,9 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.service;
 
-import com.kdt_y_be_toy_project2.domain.itinerary.domain.TransportationType;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
-import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.AccommodationInfoRequest;
-import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.MoveInfoRequest;
-import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.StayInfoRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
 import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import com.kdt_y_be_toy_project2.global.factory.ItineraryTestFactory;
-import com.kdt_y_be_toy_project2.global.util.LocalDateTimeUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
