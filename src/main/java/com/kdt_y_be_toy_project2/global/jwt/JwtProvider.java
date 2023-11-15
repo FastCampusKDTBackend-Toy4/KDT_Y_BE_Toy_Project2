@@ -23,27 +23,13 @@ public class JwtProvider {
     @Value("${spring.application.name}")
     private String issuer;
 
-    @Value("${service.jwt.access-expiration}")
-    private Long accessExpiration;
-
-    @Value("${service.jwt.refresh-expiration}")
-    private Long refreshExpiration;
-
     private final SecretKey secretKey;
 
     public JwtProvider(@Value("${service.jwt.secret-key}") String rawSecretKey) {
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(rawSecretKey));
     }
 
-    public String createAccessToken(JwtPayload jwtPayload) {
-        return createToken(jwtPayload, accessExpiration);
-    }
-
-    public String createRefreshToken(JwtPayload jwtPayload) {
-        return createToken(jwtPayload, refreshExpiration);
-    }
-
-    private String createToken(JwtPayload jwtPayload, long expiration) {
+    public String createToken(JwtPayload jwtPayload, long expiration) {
         return Jwts.builder()
             .claim(USER_KEY, Objects.requireNonNull(jwtPayload.email()))
             .issuer(issuer)
@@ -58,7 +44,6 @@ public class JwtProvider {
             Jws<Claims> claimsJws = Jwts.parser().verifyWith(secretKey).build()
                 .parseSignedClaims(jwtToken);
             Claims payload = claimsJws.getPayload();
-
             return new JwtPayload(payload.get(USER_KEY, String.class), payload.getIssuedAt());
         } catch (ExpiredJwtException e) {
             throw new TokenExpiredException(e.getMessage());

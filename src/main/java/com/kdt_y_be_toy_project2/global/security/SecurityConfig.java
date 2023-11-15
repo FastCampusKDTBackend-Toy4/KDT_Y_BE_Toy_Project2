@@ -1,6 +1,6 @@
 package com.kdt_y_be_toy_project2.global.security;
 
-import com.kdt_y_be_toy_project2.global.jwt.JwtProvider;
+import com.kdt_y_be_toy_project2.global.jwt.service.JwtService;
 import com.kdt_y_be_toy_project2.global.security.formlogin.CustomFormLoginFilter;
 import com.kdt_y_be_toy_project2.global.security.formlogin.CustomFormLoginProvider;
 import com.kdt_y_be_toy_project2.global.security.jwt.JwtAuthenticationFilter;
@@ -51,8 +51,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    CustomFormLoginFilter customFormLoginFilter(JwtProvider jwtProvider) throws Exception {
-        return new CustomFormLoginFilter(authenticationManager(), jwtProvider);
+    CustomFormLoginFilter customFormLoginFilter(JwtService jwtService) throws Exception {
+        return new CustomFormLoginFilter(authenticationManager(), jwtService);
     }
 
     @Bean
