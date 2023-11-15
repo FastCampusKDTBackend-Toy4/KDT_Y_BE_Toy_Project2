@@ -63,7 +63,8 @@ public class ItineraryController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "여정 추가 성공",content = @Content(schema = @Schema(implementation = ItineraryResponse.class))),
             @ApiResponse(responseCode = "404", description = "여행 ID와 매칭되는 여행이 없습니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "400", description = "여행 일정 안에 여정이 들어갈 수 없습니다. (여정이 여행 일정 범위 밖에 있습니다.)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "400", description = "여행 일정 안에 여정이 들어갈 수 없습니다. (여정이 여행 일정 범위 밖에 있습니다.)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "접근 권한이 없는 사용자 입니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 
     })
     public ResponseEntity<ItineraryResponse> createItinerary(
@@ -79,7 +80,9 @@ public class ItineraryController {
     @Operation(summary = "여정 수정", description = "특정 여행에 속한 특정 여정을 수정합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "여정 수정 성공", content = @Content(schema = @Schema(implementation = ItineraryResponse.class))),
-            @ApiResponse(responseCode = "404", description = "여정 수정 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "404", description = "여정 수정 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "접근 권한이 없는 사용자 입니다.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+
     })
     public ResponseEntity<ItineraryResponse> editItinerary(
             @SecurityContext LoginInfo loginInfo,
