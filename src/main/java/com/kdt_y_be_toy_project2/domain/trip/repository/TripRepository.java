@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
-import com.kdt_y_be_toy_project2.domain.trip.domain.TripType;
+import com.kdt_y_be_toy_project2.domain.trip.domain.type.TripType;
 
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Long> {

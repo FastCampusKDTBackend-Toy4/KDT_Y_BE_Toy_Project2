@@ -4,6 +4,8 @@ package com.kdt_y_be_toy_project2.domain.itinerary.controller;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
 import com.kdt_y_be_toy_project2.domain.itinerary.service.ItineraryService;
+import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
+import com.kdt_y_be_toy_project2.global.resolver.SecurityContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -65,11 +67,12 @@ public class ItineraryController {
 
     })
     public ResponseEntity<ItineraryResponse> createItinerary(
-            @Parameter(description = "여행 ID") @PathVariable(name = "trip_id") final Long tripId,
+            @SecurityContext LoginInfo loginInfo,
+            @Parameter(description = "여행 ID")@PathVariable(name = "trip_id") final Long tripId,
             @Parameter(description = "여정 요청 객체") @RequestBody final ItineraryRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(itineraryService.createItinerary(tripId, request));
+                .body(itineraryService.createItinerary(loginInfo, tripId, request));
     }
 
     @PutMapping("/trips/{trip_id}/itineraries/{itinerary_id}")
@@ -79,11 +82,12 @@ public class ItineraryController {
             @ApiResponse(responseCode = "404", description = "여정 수정 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<ItineraryResponse> editItinerary(
+            @SecurityContext LoginInfo loginInfo,
             @Parameter(description = "여행 ID") @PathVariable(name = "trip_id") final Long tripId,
             @Parameter(description = "여정 ID") @PathVariable(name = "itinerary_id") final Long itineraryId,
             @Parameter(description = "여정 요청 객체") @RequestBody final ItineraryRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(itineraryService.editItinerary(tripId, itineraryId, request));
+                .body(itineraryService.editItinerary(loginInfo, tripId, itineraryId, request));
     }
 }

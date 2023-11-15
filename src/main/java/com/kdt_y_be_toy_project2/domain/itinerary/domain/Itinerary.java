@@ -20,8 +20,7 @@ public class Itinerary {
     private Long id;
 
     @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn(name="trip")
-    @NotNull
+    @JoinColumn(name="trip", nullable = false)
     private Trip trip;
 
     //체류 정보, 이동 정보, 숙소 정보
