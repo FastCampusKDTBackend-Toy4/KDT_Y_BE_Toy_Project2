@@ -19,15 +19,21 @@ public class MoveInfo {
     })
     private DateTimeScheduleInfo moveSchedule;
 
-    @Embedded
+
     @AttributeOverrides({
-            @AttributeOverride(name = "name", column = @Column(name = "soucre_place_name"))
+            @AttributeOverride(name = "name", column = @Column(name = "source_place_name")),
+            @AttributeOverride(name = "roadAddressName", column = @Column(name = "source_place_road_address_name")),
+            @AttributeOverride(name = "x", column = @Column(name = "source_place_x")),
+            @AttributeOverride(name = "y", column = @Column(name = "source_place_y")),
     })
     private PlaceInfo sourcePlaceInfo;
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "name", column = @Column(name = "dest_place_name"))
+            @AttributeOverride(name = "name", column = @Column(name = "dest_place_name")),
+            @AttributeOverride(name = "roadAddressName", column = @Column(name = "dest_place_road_address_name")),
+            @AttributeOverride(name = "x", column = @Column(name = "dest_place_x")),
+            @AttributeOverride(name = "y", column = @Column(name = "dest_place_y")),
     })
     private PlaceInfo destPlaceInfo;
 

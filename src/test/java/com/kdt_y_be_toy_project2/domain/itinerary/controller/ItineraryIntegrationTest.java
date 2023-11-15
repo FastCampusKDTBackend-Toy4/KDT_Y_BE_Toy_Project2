@@ -1,6 +1,7 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kdt_y_be_toy_project2.domain.itinerary.api.RoadAddressInfoAPI;
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
@@ -170,7 +171,7 @@ class ItineraryIntegrationTest {
                     .startDateTime(LocalDateTime.from(trip.getTripSchedule().getStartDate().atStartOfDay()))
                     .endDateTime(LocalDateTime.from(trip.getTripSchedule().getEndDate().atStartOfDay())).build());
 
-            Itinerary expectedItinerary = ItineraryRequest.toEntity(request, trip);
+            Itinerary expectedItinerary = itineraryService.updateItineraryWithRoadAddresses(request, trip);
 
             // when
             ResultActions createTripAction = mockMvc.perform(post("/v1/trips/" + trip.getId() + "/itineraries")
@@ -208,7 +209,7 @@ class ItineraryIntegrationTest {
 
             long savedItineraryId = savedItinerary.getId();
 
-            Itinerary expectedItinerary = ItineraryRequest.toEntity(request, trip);
+            Itinerary expectedItinerary = itineraryService.updateItineraryWithRoadAddresses(request, trip);
 
             // when
             ResultActions editItineraryAction = mockMvc.perform(
@@ -220,7 +221,8 @@ class ItineraryIntegrationTest {
 
             // then
             editItineraryAction
-                    .andDo(MockMvcResultHandlers.print());
+                    .andDo(MockMvcResultHandlers.print())
+                    .andExpect(status().isOk());
 
             assertItineraryResponse(expectedItinerary, editItineraryAction);
         }

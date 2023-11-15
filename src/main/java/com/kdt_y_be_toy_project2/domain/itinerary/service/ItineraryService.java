@@ -1,10 +1,19 @@
 package com.kdt_y_be_toy_project2.domain.itinerary.service;
 
-import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
+import com.kdt_y_be_toy_project2.domain.itinerary.api.RoadAddressInfoAPI;
+import com.kdt_y_be_toy_project2.domain.itinerary.domain.*;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryRequest;
 import com.kdt_y_be_toy_project2.domain.itinerary.dto.ItineraryResponse;
 import com.kdt_y_be_toy_project2.domain.itinerary.exception.*;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.AccommodationInfoRequest;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.MoveInfoRequest;
+import com.kdt_y_be_toy_project2.domain.itinerary.dto.request.StayInfoRequest;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidDateException;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.InvalidItineraryDurationException;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.ItineraryNotFoundException;
+import com.kdt_y_be_toy_project2.domain.itinerary.exception.TripNotFoundException;
 import com.kdt_y_be_toy_project2.domain.itinerary.repository.ItineraryRepository;
+import com.kdt_y_be_toy_project2.domain.model.DateTimeScheduleInfo;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import com.kdt_y_be_toy_project2.domain.trip.repository.TripRepository;
 import com.kdt_y_be_toy_project2.global.resolver.LoginInfo;
@@ -26,6 +35,7 @@ public class ItineraryService {
 
     private final ItineraryRepository itineraryRepository;
     private final TripRepository tripRepository;
+    private final RoadAddressInfoAPI roadAddressInfoAPI;
 
     @Transactional(readOnly = true)
     public List<ItineraryResponse> getAllItineraries(final Long tripId) {
@@ -56,7 +66,10 @@ public class ItineraryService {
         checkItineraryDuration(retrivedTrip, request);
         checkInvalidDate(request);
 
-        Itinerary savedItinerary = Optional.of(itineraryRepository.save(ItineraryRequest.toEntity(request, retrivedTrip))).orElseThrow();
+        //Itinerary savedItinerary = Optional.of(itineraryRepository.save(ItineraryRequest.toEntity(request, retrivedTrip))).orElseThrow();
+        Itinerary itinerary = updateItineraryWithRoadAddresses(request, retrivedTrip);
+        Itinerary savedItinerary = Optional.of(itineraryRepository.save(itinerary)).orElseThrow();
+
         retrivedTrip.getItineraries().add(savedItinerary);
 
         return Optional.of(ItineraryResponse.from(savedItinerary)).orElseThrow();
@@ -68,7 +81,8 @@ public class ItineraryService {
 
         checkAuth (loginInfo, retrivedTrip);
         Itinerary retrivedItinerary = findItineraryInTrip(retrivedTrip,itineraryId).orElseThrow();
-        retrivedItinerary.update(ItineraryRequest.toEntity(request, retrivedTrip));
+        Itinerary updateItinerary = updateItineraryWithRoadAddresses(request, retrivedTrip);
+        retrivedItinerary.update(updateItinerary);
         checkItineraryDuration(retrivedItinerary.getTrip(), request);
         checkInvalidDate(request);
 
@@ -98,6 +112,7 @@ public class ItineraryService {
         ) throw new InvalidDateException();
     }
 
+
     Optional<Itinerary> findItineraryInTrip (Trip trip, long itineraryId) {
 
         for (Itinerary itinerary : trip.getItineraries()) {
@@ -114,5 +129,53 @@ public class ItineraryService {
             throw new InvalidAuthException();
         }
     }
+
+
+    public Itinerary updateItineraryWithRoadAddresses(ItineraryRequest request, Trip trip) {
+
+        MoveInfoRequest moveInfoRequest = request.moveInfoRequest();
+        AccommodationInfoRequest accommodationInfoRequest = request.accommodationInfoRequest();
+        StayInfoRequest stayInfoRequest = request.stayInfoRequest();
+
+        return Itinerary.builder()
+                .stayInfo(buildStayInfo(stayInfoRequest))
+                .accommodationInfo(buildAccommodationInfo(accommodationInfoRequest))
+                .moveInfo(buildMoveInfo(moveInfoRequest))
+                .trip(trip)
+                .build();
+    }
+
+    MoveInfo buildMoveInfo(MoveInfoRequest moveInfoRequest){
+        return MoveInfo.builder()
+                .moveSchedule(DateTimeScheduleInfo.builder()
+                        .startDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.startDateTime()))
+                        .endDateTime(LocalDateTimeUtil.toLocalDateTime(moveInfoRequest.endDateTime()))
+                        .build())
+                .sourcePlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.sourcePlaceName()))
+                .destPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(moveInfoRequest.destPlaceName()))
+                .transportationType(TransportationType.getByValue(moveInfoRequest.transportationType()))
+                .build();
+    }
+
+    StayInfo buildStayInfo(StayInfoRequest stayInfoRequest){
+        return StayInfo.builder()
+                .staySchedule(DateTimeScheduleInfo.builder().startDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.startDateTime()))
+                        .endDateTime(LocalDateTimeUtil.toLocalDateTime(stayInfoRequest.endDateTime())).build())
+                .stayPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(stayInfoRequest.stayPlaceName()))
+                .build();
+    }
+
+    AccommodationInfo buildAccommodationInfo(AccommodationInfoRequest accommodationInfoRequest){
+        return AccommodationInfo.builder()
+                .accommodationSchedule(DateTimeScheduleInfo.builder()
+                        .startDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.startDateTime()))
+                        .endDateTime(LocalDateTimeUtil.toLocalDateTime(accommodationInfoRequest.endDateTime()))
+                        .build())
+                .accommodationPlaceInfo(roadAddressInfoAPI.getPlaceInfoByKeyword(accommodationInfoRequest.accommodationPlaceName()))
+                .build();
+    }
+
+
+
 
 }
