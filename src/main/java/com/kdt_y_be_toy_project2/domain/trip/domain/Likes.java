@@ -3,6 +3,7 @@ package com.kdt_y_be_toy_project2.domain.trip.domain;
 import com.kdt_y_be_toy_project2.domain.member.domain.Member;
 import com.kdt_y_be_toy_project2.domain.trip.domain.id.LikesID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,11 +22,11 @@ public class Likes {
 	@EmbeddedId
 	private LikesID likesID;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@MapsId("trip_id")
 	private Trip trip;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@MapsId("member_email")
 	private Member member;
 
