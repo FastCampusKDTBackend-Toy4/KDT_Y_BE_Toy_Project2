@@ -27,17 +27,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String accessToken = request.getHeader(CustomHttpHeaders.ACCESS_TOKEN);
-        String refreshToken = request.getHeader(CustomHttpHeaders.REFRESH_TOKEN);
 
         SecurityContextHolder.getContext()
             .setAuthentication(authenticationManager.authenticate(
-                JwtAuthenticationToken.unAuthorizeToken(accessToken, refreshToken)));
+                JwtAuthenticationToken.unAuthorize(accessToken)));
 
         chain.doFilter(request, response);
     }
 
     private boolean hasJwtToken(HttpServletRequest request) {
-        return request.getHeader(CustomHttpHeaders.ACCESS_TOKEN) != null &&
-            request.getHeader(CustomHttpHeaders.REFRESH_TOKEN) != null;
+        return request.getHeader(CustomHttpHeaders.ACCESS_TOKEN) != null;
     }
 }

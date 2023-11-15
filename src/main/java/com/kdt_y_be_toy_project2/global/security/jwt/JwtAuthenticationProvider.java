@@ -22,7 +22,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         String accessToken = (String) authentication.getCredentials();
         JwtPayload jwtPayload = jwtService.verifyToken(accessToken);
 
-        return JwtAuthenticationToken.authorizeToken(jwtPayload.email());
+        return JwtAuthenticationToken.authorize(jwtPayload.email());
     }
 
     @Override

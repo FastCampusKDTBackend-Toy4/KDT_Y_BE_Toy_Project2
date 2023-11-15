@@ -2,7 +2,8 @@ package com.kdt_y_be_toy_project2.global.security.formlogin;
 
 import com.kdt_y_be_toy_project2.global.config.CustomHttpHeaders;
 import com.kdt_y_be_toy_project2.global.jwt.JwtPayload;
-import com.kdt_y_be_toy_project2.global.jwt.JwtProvider;
+import com.kdt_y_be_toy_project2.global.jwt.service.JwtService;
+import com.kdt_y_be_toy_project2.global.jwt.service.TokenPair;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,12 +15,12 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 
 public class CustomFormLoginFilter extends AbstractAuthenticationProcessingFilter {
 
-    private final JwtProvider jwtProvider;
+    private final JwtService jwtService;
 
-    public CustomFormLoginFilter(AuthenticationManager authenticationManager, JwtProvider jwtProvider) {
+    public CustomFormLoginFilter(AuthenticationManager authenticationManager, JwtService jwtService) {
         super("/v1/login");
         setAuthenticationManager(authenticationManager);
-        this.jwtProvider = jwtProvider;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -38,9 +39,9 @@ public class CustomFormLoginFilter extends AbstractAuthenticationProcessingFilte
     protected void successfulAuthentication(HttpServletRequest request,
         HttpServletResponse response, FilterChain chain, Authentication authResult) {
         String email = (String) authResult.getPrincipal();
-
+        TokenPair tokenPair = jwtService.createTokenPair(new JwtPayload(email, new Date()));
         response.setHeader(
-            CustomHttpHeaders.ACCESS_TOKEN, jwtProvider.createAccessToken(new JwtPayload(email, new Date())));
-        response.setHeader(CustomHttpHeaders.REFRESH_TOKEN, jwtProvider.createRefreshToken(new JwtPayload(email, new Date())));
+            CustomHttpHeaders.ACCESS_TOKEN, tokenPair.accessToken());
+        response.setHeader(CustomHttpHeaders.REFRESH_TOKEN, tokenPair.refreshToken());
     }
 }
