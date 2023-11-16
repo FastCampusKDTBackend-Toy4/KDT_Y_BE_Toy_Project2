@@ -5,6 +5,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kdt_y_be_toy_project2.domain.member.domain.Member;
 import com.kdt_y_be_toy_project2.domain.member.exception.InvalidAuthException;
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
+import com.kdt_y_be_toy_project2.domain.trip.dto.FindTripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripRequest;
 import com.kdt_y_be_toy_project2.domain.trip.dto.TripResponse;
 import com.kdt_y_be_toy_project2.domain.trip.exception.TripNotFoundException;
@@ -118,7 +120,7 @@ public class TripControllerTest {
 			Member mockMember = MemberTestFactory.createTestMemberWithRandomPassword();
 			Trip mockTrip = TripTestFactory.createTestTripWithID(mockMember, tripId);
 
-			TripResponse tripResponse = TripResponse.from(mockTrip);
+			FindTripResponse tripResponse = FindTripResponse.from(mockTrip, Collections.emptyList());
 			given(tripService.getTripById(anyLong())).willReturn(tripResponse);
 
 			// when
