@@ -137,7 +137,7 @@ public class TripController {
 	@PostMapping("/{trip_id}/comments")
 	public ResponseEntity<Void> addLikeTrip(@Valid @RequestBody TripCommentRequest tripCommentRequest,
 		@PathVariable(name = "trip_id") final Long tripId, @SecurityContext LoginInfo loginInfo) {
-		tripService.createComment(tripCommentRequest, tripId, loginInfo.username());
+		tripService.createComment(tripCommentRequest, tripId, loginInfo);
 
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}

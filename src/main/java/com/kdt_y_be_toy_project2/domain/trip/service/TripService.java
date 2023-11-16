@@ -157,9 +157,11 @@ public class TripService {
 		likesRepository.save(newLikes);
 	}
 
-	public void createComment(TripCommentRequest dto, Long tripId, String email) {
+	public void createComment(TripCommentRequest dto, Long tripId, LoginInfo loginInfo) {
+		Member member = memberRepository.findById(loginInfo.username()).orElseThrow(MemberNotFoundException::new);
+
+		validateAuth(loginInfo, member);
 		Trip trip = tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
-		Member member = memberRepository.findByEmail(email).orElseThrow();
 		Comment comment = Comment.builder()
 			.trip(trip)
 			.member(member)
