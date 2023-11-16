@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -48,6 +49,7 @@ import com.kdt_y_be_toy_project2.global.util.DateTimeUtil;
 @WebMvcTest(TripController.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@MockBean(JpaMetamodelMappingContext.class)
 @ExtendWith(MockitoExtension.class)
 public class TripControllerTest {
 
