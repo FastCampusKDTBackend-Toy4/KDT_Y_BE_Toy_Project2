@@ -72,17 +72,17 @@ public class TripService {
 
 	public TripResponse createTrip(final TripRequest request, LoginInfo loginInfo) {
 		Member member = memberRepository.findById(loginInfo.username()).orElseThrow(MemberNotFoundException::new);
-		validateAuth(loginInfo, member);
 		return Optional.of(tripRepository.save(TripRequest.toEntity(request, member)))
 			.map(TripResponse::from)
 			.orElseThrow();
 	}
 
 	public TripResponse editTrip(final Long tripId, final TripRequest request, LoginInfo loginInfo) {
-		Member member = memberRepository.findById(loginInfo.username()).orElseThrow(MemberNotFoundException::new);
-		validateAuth(loginInfo, member);
 		return TripResponse.from(tripRepository.findById(tripId)
-			.map(trip -> trip.update(TripRequest.toEntity(request, member)))
+			.map(trip -> {
+				validateAuth(loginInfo, trip.getMember());
+				return trip.update(TripRequest.toEntity(request, trip.getMember()));
+			})
 			.orElseThrow(TripNotFoundException::new));
 	}
 
