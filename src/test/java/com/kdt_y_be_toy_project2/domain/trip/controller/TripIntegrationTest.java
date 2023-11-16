@@ -10,10 +10,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -42,6 +44,7 @@ import com.kdt_y_be_toy_project2.global.util.DateTimeUtil;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@WithMockUser
 @ActiveProfiles("test")
 class TripIntegrationTest {
 
@@ -93,7 +96,7 @@ class TripIntegrationTest {
 		@Test
 		void shouldSuccessToGetAllTrips() throws Exception {
 			// given
-			Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			tripRepository.saveAll(TripTestFactory.createTestTripList(5, member));
 
 			// when
@@ -109,7 +112,7 @@ class TripIntegrationTest {
 		@Test
 		void shouldSuccessToGetTripById() throws Exception {
 			// given
-			Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			Trip expectedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
 			long tripId = expectedTrip.getId();
 
@@ -138,14 +141,15 @@ class TripIntegrationTest {
 	}
 
 	@DisplayName("여행 정보를 등록할 때")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
 	class CreateTripsTest {
 
 		private Member member;
 		private HttpHeaders testAuthHeaders;
 
-		@BeforeEach
-		public void beforeEach() {
+		@BeforeAll
+		public void beforeAll() {
 			member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			testAuthHeaders = createTestAuthHeader(member.getEmail());
 		}
@@ -255,6 +259,7 @@ class TripIntegrationTest {
 	}
 
 	@DisplayName("여행 정보를 수정할 때")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
 	class EditTripsTest {
 
@@ -262,10 +267,10 @@ class TripIntegrationTest {
 		private HttpHeaders testAuthHeaders;
 		private Trip savedTrip;
 
-		@BeforeEach
-		void beforeEach() {
+		@BeforeAll
+		void beforeAll() {
 			// given
-			member = MemberTestFactory.createTestMemberWithRandomPassword();
+			member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			testAuthHeaders = createTestAuthHeader(member.getEmail());
 			savedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
 		}
@@ -326,6 +331,7 @@ class TripIntegrationTest {
 	}
 
 	@DisplayName("여행 정보를 검색할 때")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
 	class SearchTripTest {
 
@@ -355,10 +361,10 @@ class TripIntegrationTest {
 			return list.stream();
 		}
 
-		@BeforeEach
-		void beforeEach() {
+		@BeforeAll
+		void beforeAll() {
 			// given
-			Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			savedTripList = tripRepository.saveAll(TripTestFactory.createTestTripList(5, member));
 		}
 
@@ -414,6 +420,7 @@ class TripIntegrationTest {
 	}
 
 	@DisplayName("여행 정보 좋아요 관련 테스트")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
 	class TripLikesTest {
 
@@ -421,10 +428,10 @@ class TripIntegrationTest {
 
 		private HttpHeaders testAuthHeaders;
 
-		@BeforeEach
-		void beforeEach() {
+		@BeforeAll
+		void beforeAll() {
 			// given
-			Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			savedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
 			testAuthHeaders = createTestAuthHeader(member.getEmail());
 		}
