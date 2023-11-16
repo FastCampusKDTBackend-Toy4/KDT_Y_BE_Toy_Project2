@@ -2,8 +2,6 @@
 
 ## Branch 전략
 
----
-
 ![branch_strategy.png](./images/branch_strategy.png)
 
 - branch 전략은 `***gitflow***` 을 채택했습니다.
@@ -27,8 +25,6 @@ refactor/00리팩토링
 ```
 
 ## 커밋 컨벤션
-
----
 
 - 커밋 메시지는 한글로 작성한다.
 - 커밋 메시지의 타이틀에는 Header과 개괄적인 변경사항을 작성한다.
@@ -56,8 +52,6 @@ close #94
 ![commit_convention.png](./images/commit_convention.png)
 
 ## Github 컨벤션
-
----
 
 ### Github Issue
 

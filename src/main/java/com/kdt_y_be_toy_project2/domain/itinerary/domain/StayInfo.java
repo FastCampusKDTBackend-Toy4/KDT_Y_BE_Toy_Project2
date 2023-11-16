@@ -22,6 +22,9 @@ public class StayInfo {
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "name", column = @Column(name = "stay_place_name")),
+            @AttributeOverride(name = "roadAddressName", column = @Column(name = "stay_place_road_address_name")),
+            @AttributeOverride(name = "x", column = @Column(name = "stay_place_x")),
+            @AttributeOverride(name = "y", column = @Column(name = "stay_place_y")),
     })
     private PlaceInfo stayPlaceInfo;
 

@@ -21,18 +21,25 @@ Project
     │   ├── java
     │   │   └── com
     │   │       └── kdt_y_be_toy_project2
-    │   │           ├── KdtYBeToyProject2Application.java
     │   │           ├── domain
     │   │           │   ├── itinerary
+    │   │           │   │   ├── api
     │   │           │   │   ├── controller
     │   │           │   │   ├── domain
     │   │           │   │   ├── dto
     │   │           │   │   ├── exception
     │   │           │   │   ├── repository
     │   │           │   │   └── service
+    │   │           │   ├── member
+    │   │           │   │   ├── controller
+    │   │           │   │   ├── domain
+    │   │           │   │   ├── dto
+    │   │           │   │   │   └── request
+    │   │           │   │   ├── exception
+    │   │           │   │   ├── repository
+    │   │           │   │   └── service
     │   │           │   ├── model
-    │   │           │   │   ├── PlaceInfo.java
-    │   │           │   │   └── TimeScheduleInfo.java
+    │   │           │   │   └── exception
     │   │           │   └── trip
     │   │           │       ├── controller
     │   │           │       ├── domain
@@ -42,7 +49,11 @@ Project
     │   │           │       └── service
     │   │           └── global
     │   │               ├── config
-    │   │               └── error
+    │   │               ├── error
+    │   │               ├── jwt
+    │   │               ├── resolver
+    │   │               ├── security
+    │   │               └── util
     │   └── resources
     │       ├── application.properties
     │       ├── static
@@ -51,7 +62,23 @@ Project
         └── java
             └── com
                 └── kdt_y_be_toy_project2
-                    └── KdtYBeToyProject2ApplicationTests.java
+                    ├── domain
+                    │   └── trip
+                    │   │   ├── controller
+                    │   │   ├── repository
+                    │   │   └── service
+                    │   └── itinerary
+                    │   │   ├── controller
+                    │   │   ├── repository
+                    │   │   └── service
+                    │   └── model
+                    ├── global
+                    │   ├── factory
+                    │   ├── helper
+                    │   └── jwt
+                    │       └── service
+                    │  
+                    └── integration
 ```
 
 ## 컨트롤러

@@ -1,12 +1,22 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+  application:
+    name: KDT-5
+  ## 프로필 설정을 바꾸시려면 아래 주석을 해제해 주시면 됩니다.
+  #profiles:
+  #  active: dev
 
   datasource:
     url: jdbc:mysql://localhost:${LOCAL_MYSQL_PORT}/fc_sns?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${LOCAL_MYSQL_USERNAME}
     password: ${LOCAL_MYSQL_PASSWORD}
+  ## h2를 사용하려면 mysql 설정을 주석처리한 뒤, 아래 주석을 해제해 주시면 됩니다.
+  #datasource:
+  #  url: jdbc:h2:mem:test
+  #  username: sa
+  #  driver-class-name: org.h2.Driver
 
   jpa:
     properties:
@@ -14,3 +24,13 @@ spring:
       dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: validate
+
+service:
+  jwt:
+    secret-key: kj23h523kj5h24o1209481230948fsdfkljut90dgd89f0s2kl3daisoudqiwouekjashdjkahjkaqwueyqouasioudklascxcvhjuopqfu9aduro3
+    access-expiration: 36000000
+    refresh-expiration: 864000000
+
+kakao:
+  rest:
+    api-key: ${KAKAO_API_KEY}

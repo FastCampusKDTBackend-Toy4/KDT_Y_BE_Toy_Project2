@@ -3,6 +3,7 @@ package com.kdt_y_be_toy_project2.domain.itinerary.domain;
 
 import com.kdt_y_be_toy_project2.domain.trip.domain.Trip;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 
@@ -19,7 +20,7 @@ public class Itinerary {
     private Long id;
 
     @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn(name="trip")
+    @JoinColumn(name="trip", nullable = false)
     private Trip trip;
 
     //체류 정보, 이동 정보, 숙소 정보
