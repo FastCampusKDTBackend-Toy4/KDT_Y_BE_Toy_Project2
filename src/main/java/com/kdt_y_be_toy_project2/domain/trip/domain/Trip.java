@@ -2,6 +2,7 @@ package com.kdt_y_be_toy_project2.domain.trip.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.kdt_y_be_toy_project2.domain.itinerary.domain.Itinerary;
 import com.kdt_y_be_toy_project2.domain.member.domain.Member;
@@ -24,23 +25,20 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Trip {
-	@OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
-	List<Comment> comments;
+	@OneToMany(mappedBy = "trip", cascade = CascadeType.PERSIST, orphanRemoval = true)
+	private List<Comment> comments;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
 	@JoinColumn(name = "member_email", nullable = false)
 	private Member member;
 	@Column(nullable = false)
@@ -48,7 +46,7 @@ public class Trip {
 	@Column(name = "trip_type", nullable = false)
 	@Convert(converter = TripTypeConverter.class)
 	private TripType tripType;
-	@OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "trip", cascade = CascadeType.PERSIST, orphanRemoval = true)
 	private List<Itinerary> itineraries;
 	@Column(nullable = false)
 	private Long likesCount;
@@ -61,14 +59,15 @@ public class Trip {
 	private DateScheduleInfo tripSchedule;
 
 	@Builder
-	private Trip(Long id, Member member, String name, TripType tripType, DateScheduleInfo tripSchedule) {
+	private Trip(Long id, Member member, String name, TripType tripType, DateScheduleInfo tripSchedule,
+		List<Comment> comments, List<Itinerary> itineraries) {
 		this.id = id;
 		this.member = member;
 		this.name = name;
 		this.tripType = tripType;
 		this.tripSchedule = tripSchedule;
-		this.comments = new ArrayList<>();
-		this.itineraries = new ArrayList<>();
+		this.comments = Objects.requireNonNullElse(comments, new ArrayList<>());
+		this.itineraries = Objects.requireNonNullElse(itineraries, new ArrayList<>());
 		this.likesCount = 0L;
 	}
 
