@@ -12,6 +12,10 @@
   LOCAL_MYSQL_PASSWORD=<MYSQL의 ROOT password>
   LOCAL_MYSQL_VOLUME_PATH=./bin/mysql # MYSQL 데이터를 저장할 본인 컴퓨터 경로
   LOCAL_MYSQL_PORT=3306 # 컴퓨터에서 사용할 PORT
+  
+  LOCAL_REDIS_VOLUME_PATH=./bin/redis # REDIS 데이터를 저장할 본인 컴퓨터 경로
+  LOCAL_REDIS_PORT=6379 # 컴퓨터에서 사용할 REDIS PORT
+  KAKAO_API_KEY=<Kakao API Key> # 개인의 Kakao Open API key
   ```
 - docker compose를 사용하여 mysql 데이터베이스 환경을 만들 수 있습니다.
     - 인텔리제이의 docker plugin 기능을 사용하시거나, 다음 명령어를 입력해서 데이터베이스 환경을 구성하세요.
@@ -21,17 +25,17 @@
 
 ## 🧑‍🤝‍🧑 조원 & 역할
 
-| 이름  | 역할                    |
-|-----|-----------------------|
-| 한상우 | 조장, 여행 도메인 개발, 문서 관리  |
-| 구자현 | 설계, git 관리, QA, 공통 처리 |
-| 박경탁 | 여행 도메인 개발             |
-| 심재철 | 여정 도메인 개발             |
-| 이민균 | 여정 도메인 개발             |
+| 이름  | 역할                          |
+|-----|-----------------------------|
+| 한상우 | 조장, 여행 도메인 개발, 문서 관리        |
+| 구자현 | 설계, git 관리, Security, 공통 처리 |
+| 박경탁 | 여행 도메인 개발                   |
+| 심재철 | 여정 도메인 개발                   |
+| 이민균 | 여정 도메인 개발                   |
 
 ## 🚀 프로젝트 일정
 
-- 프로젝트 기간: 10월 23일(월) ~ 10월 27일(금)
+- 프로젝트 기간: 11월 10일(금) ~ 11월 16일(목)
 
 ![project_schedule.png](./docs/images/project_schedule.png)
 
@@ -85,8 +89,16 @@ http://localhost:8080/swagger-ui/index.html
 ## 📦 패키지 구조
 
 ```
-├── README.md
+Project
+├── HELP.md
 ├── build.gradle
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradlew
+├── gradlew.bat
+├── readme.md
 ├── settings.gradle
 └── src
     ├── main
@@ -95,9 +107,18 @@ http://localhost:8080/swagger-ui/index.html
     │   │       └── kdt_y_be_toy_project2
     │   │           ├── domain
     │   │           │   ├── itinerary
+    │   │           │   │   ├── api
     │   │           │   │   ├── controller
     │   │           │   │   ├── domain
     │   │           │   │   ├── dto
+    │   │           │   │   ├── exception
+    │   │           │   │   ├── repository
+    │   │           │   │   └── service
+    │   │           │   ├── member
+    │   │           │   │   ├── controller
+    │   │           │   │   ├── domain
+    │   │           │   │   ├── dto
+    │   │           │   │   │   └── request
     │   │           │   │   ├── exception
     │   │           │   │   ├── repository
     │   │           │   │   └── service
@@ -113,23 +134,37 @@ http://localhost:8080/swagger-ui/index.html
     │   │           └── global
     │   │               ├── config
     │   │               ├── error
+    │   │               ├── jwt
+    │   │               ├── resolver
+    │   │               ├── security
     │   │               └── util
     │   └── resources
-    │       └── application*.properties
+    │       ├── application.properties
+    │       ├── static
+    │       └── templates
     └── test
         └── java
             └── com
                 └── kdt_y_be_toy_project2
-                    ├── integeration
-                    ├── domain
-                    │   ├── trip
-                    │   │   └── controller
-                    │   ├── itinerary
-                    │   │   └── controller
-                    │   └── model
-                    └── global
-                        └── factory
+                    ├── domain
+                    │   └── trip
+                    │   │   ├── controller
+                    │   │   ├── repository
+                    │   │   └── service
+                    │   └── itinerary
+                    │   │   ├── controller
+                    │   │   ├── repository
+                    │   │   └── service
+                    │   └── model
+                    ├── global
+                    │   ├── factory
+                    │   ├── helper
+                    │   └── jwt
+                    │       └── service
+                    │  
+                    └── integration
 ```
+
 
 ## ⌨️ 코드 컨벤션
 
