@@ -7,5 +7,5 @@ spring:
 service:
   jwt:
     secret-key: kj23h523kj5h24o1209481230948fsdfkljut90dgd89f0s2kl3daisoudqiwouekjashdjkahjkaqwueyqouasioudklascxcvhjuopqfu9aduro3
-    access-expiration: 360000
-    refresh-expiration: 600000
+    access-expiration: 36000000
+    refresh-expiration: 864000000

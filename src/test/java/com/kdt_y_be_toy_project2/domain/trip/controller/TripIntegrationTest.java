@@ -93,7 +93,7 @@ class TripIntegrationTest {
 		@Test
 		void shouldSuccessToGetAllTrips() throws Exception {
 			// given
-			Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			tripRepository.saveAll(TripTestFactory.createTestTripList(5, member));
 
 			// when
@@ -109,7 +109,7 @@ class TripIntegrationTest {
 		@Test
 		void shouldSuccessToGetTripById() throws Exception {
 			// given
-			Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			Trip expectedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
 			long tripId = expectedTrip.getId();
 
@@ -265,7 +265,7 @@ class TripIntegrationTest {
 		@BeforeEach
 		void beforeEach() {
 			// given
-			member = MemberTestFactory.createTestMemberWithRandomPassword();
+			member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			testAuthHeaders = createTestAuthHeader(member.getEmail());
 			savedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
 		}
@@ -424,7 +424,7 @@ class TripIntegrationTest {
 		@BeforeEach
 		void beforeEach() {
 			// given
-			Member member = MemberTestFactory.createTestMemberWithRandomPassword();
+			Member member = memberRepository.save(MemberTestFactory.createTestMemberWithRandomPassword());
 			savedTrip = tripRepository.save(TripTestFactory.createTestTrip(member));
 			testAuthHeaders = createTestAuthHeader(member.getEmail());
 		}

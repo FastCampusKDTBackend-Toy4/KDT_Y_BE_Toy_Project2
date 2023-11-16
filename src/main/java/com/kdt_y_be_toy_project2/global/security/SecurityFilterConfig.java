@@ -37,8 +37,8 @@ public class SecurityFilterConfig {
 				sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		http.authorizeHttpRequests(request ->
-			request.requestMatchers("/v1/members/signUp", "/login", "/v1/refresh").permitAll()
-				.requestMatchers(HttpMethod.GET, "/v1/trips/my/likes").authenticated()
+			request.requestMatchers(HttpMethod.GET, "/v1/trips/my/likes").authenticated()
+				.requestMatchers("/v1/members/signUp", "/v1/login", "/v1/refresh").permitAll()
 				.requestMatchers(HttpMethod.GET, "/v1/trips", "/v1/trips/**").permitAll()
 				.requestMatchers("/swagger-ui/**", "/swagger/**", "/swagger-resources/**", "/v3/**").permitAll()
 				.anyRequest().authenticated()
