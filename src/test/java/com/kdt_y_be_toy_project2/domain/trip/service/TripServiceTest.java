@@ -49,7 +49,6 @@ class TripServiceTest {
 
 	private Member member;
 	private Trip trip, trip2;
-	private Comment comment;
 	private TripRequest createRequest, editRequest;
 	private TripCommentRequest tripCommentRequest;
 
@@ -60,13 +59,14 @@ class TripServiceTest {
 			.email("test@test.com")
 			.password("testpass")
 			.build();
-		comment = Comment.builder()
+		Comment comment = Comment.builder()
 			.content("댓글 테스트")
 			.member(member)
 			.build();
 		trip = Trip.builder()
 			.id(1L)
 			.name("Test Trip")
+			.member(member)
 			.tripType(TripType.DOMESTIC)
 			.tripSchedule(
 				DateScheduleInfo.builder()
@@ -74,10 +74,10 @@ class TripServiceTest {
 					.endDate(LocalDate.of(2023, 10, 27))
 					.build()
 			)
-			.itineraries(new ArrayList<>())
 			.build();
 		trip2 = Trip.builder()
 			.name("Test Trip2")
+			.member(member)
 			.tripType(TripType.FOREIGN)
 			.tripSchedule(
 				DateScheduleInfo.builder()
@@ -85,7 +85,6 @@ class TripServiceTest {
 					.endDate(LocalDate.of(2023, 10, 27))
 					.build()
 			)
-			.itineraries(new ArrayList<>())
 			.comments(List.of(comment))
 			.build();
 		createRequest = new TripRequest("Test Trip", "2023-10-25", "2023-10-27", "국내");
@@ -168,7 +167,6 @@ class TripServiceTest {
 	void editTrip() {
 		// given
 		given(tripRepository.findById(anyLong())).willReturn(Optional.ofNullable(trip));
-		given(memberRepository.findById(anyString())).willReturn(Optional.ofNullable(member));
 		LoginInfo loginInfo = new LoginInfo(member.getEmail());
 
 		// when
