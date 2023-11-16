@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.kdt_y_be_toy_project2.domain.member.domain.Member;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -18,14 +19,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EntityListeners(AuditingEntityListener.class)
@@ -35,12 +33,12 @@ public class Comment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "trip_id")
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name = "trip_id", nullable = false)
 	private Trip trip;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "member_id")
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name = "member_email", nullable = false)
 	private Member member;
 
 	@Lob
@@ -50,11 +48,12 @@ public class Comment {
 	@CreatedDate
 	private LocalDateTime createdDateTime;
 
-	public void setTrip(Trip trip) {
+	@Builder
+	private Comment(Long id, Trip trip, Member member, String content, LocalDateTime createdDateTime) {
+		this.id = id;
 		this.trip = trip;
-	}
-
-	public void setMember(Member member) {
 		this.member = member;
+		this.content = content;
+		this.createdDateTime = createdDateTime;
 	}
 }

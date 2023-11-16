@@ -32,25 +32,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Trip {
-
+	@OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+	List<Comment> comments;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "member_email", nullable = false)
 	private Member member;
-
 	@Column(nullable = false)
 	private String name;
-
 	@Column(name = "trip_type", nullable = false)
 	@Convert(converter = TripTypeConverter.class)
 	private TripType tripType;
-
 	@OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Itinerary> itineraries;
-
 	@Column(nullable = false)
 	private Long likesCount;
 
@@ -61,9 +57,6 @@ public class Trip {
 	})
 	private DateScheduleInfo tripSchedule;
 
-	@OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
-	List<Comment> comments = new ArrayList<>();
-
 	@Builder
 	private Trip(Long id, Member member, String name, TripType tripType, DateScheduleInfo tripSchedule) {
 		this.id = id;
@@ -71,6 +64,7 @@ public class Trip {
 		this.name = name;
 		this.tripType = tripType;
 		this.tripSchedule = tripSchedule;
+		this.comments = new ArrayList<>();
 		this.itineraries = new ArrayList<>();
 		this.likesCount = 0L;
 	}
